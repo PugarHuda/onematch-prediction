@@ -18,6 +18,11 @@ interface AppStore {
   // Swipe history
   swipedIds: Set<string>;
   addSwiped: (id: string) => void;
+  
+  // Toast notifications
+  toasts: Array<{ id: string; message: string; type: "success" | "error" | "info" }>;
+  addToast: (message: string, type?: "success" | "error" | "info") => void;
+  removeToast: (id: string) => void;
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -34,4 +39,12 @@ export const useAppStore = create<AppStore>((set) => ({
   swipedIds: new Set(),
   addSwiped: (id) =>
     set((s) => ({ swipedIds: new Set([...s.swipedIds, id]) })),
+  
+  toasts: [],
+  addToast: (message, type = "info") =>
+    set((s) => ({
+      toasts: [...s.toasts, { id: Date.now().toString(), message, type }],
+    })),
+  removeToast: (id) =>
+    set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }));

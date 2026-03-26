@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useCurrentAccount } from "@onelabs/dapp-kit";
 import { Header } from "@/components/Header";
 import { explorerTxUrl } from "@/lib/onechain";
@@ -54,6 +55,19 @@ const STATUS_CFG: Record<string, { label: string; bg: string; text: string }> = 
 
 export default function DuelsPage() {
   const account = useCurrentAccount();
+  const [filter, setFilter] = useState<"all" | "active" | "settled">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredDuels = MOCK_DUELS.filter((duel) => {
+    const matchesFilter = 
+      filter === "all" ||
+      (filter === "active" && (duel.status === "matched" || duel.status === "pending")) ||
+      (filter === "settled" && (duel.status === "settled_win" || duel.status === "settled_loss"));
+    
+    const matchesSearch = duel.question.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesFilter && matchesSearch;
+  });
 
   if (!account) {
     return (
@@ -75,79 +89,135 @@ export default function DuelsPage() {
       <main className="flex-1 max-w-5xl mx-auto px-4 py-6 w-full">
 
         {/* Page header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="font-mono font-bold text-3xl text-black">
-            MY DUELS
-            <span className="text-brutal-pink ml-2 text-lg">{MOCK_DUELS.length}</span>
+        <div className="flex items-center justify-between mb-6 animate-slide-in-left">
+          <h1 className="font-mono font-bold text-3xl text-black relative group">
+            <span className="relative z-10 flex items-center gap-2">
+              <span className="inline-block animate-pulse-scale">⚔️</span>
+              MY DUELS
+            </span>
+            <span className="text-brutal-pink ml-2 text-lg animate-pulse-scale inline-block">{MOCK_DUELS.length}</span>
+            {/* Animated underline */}
+            <div className="absolute -bottom-1 left-0 w-32 h-1 bg-brutal-pink group-hover:w-full transition-all duration-300" />
           </h1>
-          <Link href="/feed" className="btn-yellow px-4 py-2 text-sm">+ NEW BET</Link>
+          <Link href="/feed" className="btn-yellow px-4 py-2 text-sm hover:scale-110 active:scale-95 relative overflow-hidden group">
+            <span className="relative z-10">+ NEW BET</span>
+            <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity" />
+          </Link>
         </div>
 
         {/* Summary */}
-        <div className="border-3 border-black bg-black shadow-brutal-xl grid grid-cols-3 divide-x-3 divide-brutal-yellow mb-6">
+        <div className="border-3 border-black bg-black shadow-brutal-xl grid grid-cols-3 divide-x-3 divide-brutal-yellow mb-6 relative overflow-hidden group animate-pop-in">
+          {/* Animated glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-brutal-yellow/0 via-brutal-yellow/20 to-brutal-yellow/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+          
           {[
-            { label: "ACTIVE", value: "2", color: "text-brutal-yellow" },
-            { label: "WON",    value: "1", color: "text-brutal-green"  },
-            { label: "LOST",   value: "0", color: "text-brutal-red"    },
-          ].map((s) => (
-            <div key={s.label} className="p-4 text-center">
-              <p className={`font-mono font-bold text-3xl ${s.color}`}>{s.value}</p>
+            { label: "ACTIVE", value: "2", color: "text-brutal-yellow", icon: "⚔️" },
+            { label: "WON",    value: "1", color: "text-brutal-green",  icon: "🏆" },
+            { label: "LOST",   value: "0", color: "text-brutal-red",    icon: "💀" },
+          ].map((s, i) => (
+            <div key={s.label} className="p-4 text-center relative z-10 hover:bg-white/5 transition-colors cursor-pointer group/stat" style={{ animationDelay: `${i * 0.1}s` }}>
+              <div className="absolute top-2 right-2 opacity-30 group-hover/stat:scale-125 transition-transform">
+                <span className="text-lg">{s.icon}</span>
+              </div>
+              <p className={`font-mono font-bold text-3xl ${s.color} group-hover/stat:scale-110 transition-transform inline-block`}>{s.value}</p>
               <p className="font-mono text-xs text-white/40 uppercase">{s.label}</p>
             </div>
           ))}
         </div>
+        
+        {/* Filter & Search */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4 animate-slide-in-left" style={{ animationDelay: '0.1s' }}>
+          {/* Filter buttons */}
+          <div className="flex gap-1">
+            {(["all", "active", "settled"] as const).map((f, i) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 py-2 font-mono text-xs font-bold border-2 border-black transition-all hover:scale-105 ${
+                  filter === f
+                    ? "bg-black text-brutal-yellow shadow-brutal"
+                    : "bg-white text-black hover:bg-brutal-pink"
+                }`}
+                style={{ animationDelay: `${i * 0.05}s` }}
+              >
+                {f.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search duels..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="brutal-input text-sm flex-1 min-w-0"
+          />
+        </div>
 
         {/* Duel cards */}
         <div className="space-y-4">
-          {MOCK_DUELS.map((duel) => {
+          {filteredDuels.length === 0 ? (
+            <div className="border-3 border-black bg-white shadow-brutal p-8 text-center animate-fade-in-up">
+              <div className="text-5xl mb-3 animate-bounce-subtle">🔍</div>
+              <p className="font-mono font-bold text-xl text-black mb-2">NO DUELS FOUND</p>
+              <p className="font-mono text-sm text-black/50">Try adjusting your filters or search query</p>
+            </div>
+          ) : (
+            filteredDuels.map((duel, idx) => {
             const cfg = STATUS_CFG[duel.status] ?? STATUS_CFG.pending;
             const diff = duel.endTime - Date.now();
             const timeLeft = diff < 0 ? "ENDED" : `${Math.floor(diff / 86_400_000)}d left`;
 
             return (
-              <div key={duel.id} className="border-3 border-black bg-white shadow-brutal hover:shadow-brutal-lg transition-all">
+              <div key={duel.id} className="border-3 border-black bg-white shadow-brutal hover:shadow-brutal-lg transition-all animate-slide-in-left relative overflow-hidden group" style={{ animationDelay: `${idx * 0.1}s` }}>
+                {/* Hover glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-brutal-yellow/0 via-brutal-pink/0 to-brutal-cyan/0 group-hover:from-brutal-yellow/10 group-hover:via-brutal-pink/10 group-hover:to-brutal-cyan/10 transition-all duration-500 pointer-events-none" />
+                
                 {/* Status bar */}
                 <div
-                  className="border-b-3 border-black p-3 flex items-center justify-between"
+                  className="border-b-3 border-black p-3 flex items-center justify-between relative overflow-hidden"
                   style={{ backgroundColor: cfg.bg }}
                 >
-                  <span className="brutal-tag bg-black text-white">{cfg.label}</span>
-                  <span className="font-mono text-xs border border-black bg-white text-black px-2 py-0.5">
+                  <span className="brutal-tag bg-black text-white relative z-10 animate-pop-in">{cfg.label}</span>
+                  <span className="font-mono text-xs border border-black bg-white text-black px-2 py-0.5 relative z-10 animate-pulse-glow">
                     {timeLeft}
                   </span>
+                  {/* Animated shine */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </div>
 
-                <div className="p-4">
+                <div className="p-4 relative z-10">
                   {/* Category + question */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="brutal-tag bg-brutal-yellow text-black">
+                    <span className="brutal-tag bg-brutal-yellow text-black animate-pop-in">
                       {CATEGORY_EMOJI[duel.category]} {duel.category.toUpperCase()}
                     </span>
                   </div>
-                  <p className="font-mono font-bold text-lg text-black mb-4 leading-tight">
+                  <p className="font-mono font-bold text-lg text-black mb-4 leading-tight hover:text-brutal-purple transition-colors cursor-pointer">
                     {duel.question}
                   </p>
 
                   {/* Players */}
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="flex-1 border-2 border-black p-3 text-center bg-brutal-bg">
+                    <div className="flex-1 border-2 border-black p-3 text-center bg-brutal-bg hover:shadow-brutal transition-all group/player">
                       <p className="font-mono text-xs text-black/40 mb-1">YOU</p>
-                      <p className={`font-mono font-bold text-xl ${duel.myPosition ? "text-brutal-green" : "text-brutal-red"}`}
+                      <p className={`font-mono font-bold text-xl group-hover/player:scale-110 transition-transform inline-block ${duel.myPosition ? "text-brutal-green" : "text-brutal-red"}`}
                         style={{ WebkitTextStroke: "1px #0A0A0A" }}>
                         {duel.myPosition ? "YES" : "NO"}
                       </p>
                     </div>
-                    <div className="font-mono font-bold text-2xl text-black/30">⚔️</div>
-                    <div className="flex-1 border-2 border-black p-3 text-center bg-brutal-bg">
+                    <div className="font-mono font-bold text-2xl text-black/30 animate-pulse-scale">⚔️</div>
+                    <div className="flex-1 border-2 border-black p-3 text-center bg-brutal-bg hover:shadow-brutal transition-all group/opponent">
                       <p className="font-mono text-xs text-black/40 mb-1 truncate">
                         {duel.opponent.slice(0, 8)}…
                       </p>
-                      <p className={`font-mono font-bold text-xl ${!duel.myPosition ? "text-brutal-green" : "text-brutal-red"}`}
+                      <p className={`font-mono font-bold text-xl group-hover/opponent:scale-110 transition-transform inline-block ${!duel.myPosition ? "text-brutal-green" : "text-brutal-red"}`}
                         style={{ WebkitTextStroke: "1px #0A0A0A" }}>
                         {!duel.myPosition ? "YES" : "NO"}
                       </p>
                       <p className="font-mono text-xs text-black/40">
-                        {duel.opponentWinRate}% WR · 🔥{duel.opponentStreak}
+                        {duel.opponentWinRate}% WR · <span className="text-brutal-orange animate-pulse">🔥{duel.opponentStreak}</span>
                       </p>
                     </div>
                   </div>
@@ -156,13 +226,13 @@ export default function DuelsPage() {
                   <div className="flex items-center justify-between border-t-2 border-black pt-3">
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-black/40">POT:</span>
-                      <span className="font-mono font-bold text-brutal-pink text-lg">{duel.potOCT} OCT</span>
+                      <span className="font-mono font-bold text-brutal-pink text-lg animate-pulse-scale inline-block">{duel.potOCT} OCT</span>
                     </div>
                     <a
                       href={explorerTxUrl(duel.id)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-mono text-xs text-brutal-purple hover:underline font-bold"
+                      className="font-mono text-xs text-brutal-purple hover:underline font-bold hover:translate-x-1 transition-transform inline-block"
                     >
                       ON-CHAIN ↗
                     </a>
@@ -170,7 +240,8 @@ export default function DuelsPage() {
                 </div>
               </div>
             );
-          })}
+          })
+          )}
         </div>
       </main>
     </div>

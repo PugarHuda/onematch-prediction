@@ -115,8 +115,10 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
           className="overlay-yes absolute inset-0 pointer-events-none flex items-start justify-end p-5"
           style={{ opacity: yesOpacity }}
         >
-          <div className="border-4 border-black bg-brutal-green px-4 py-2 -rotate-12 shadow-brutal">
-            <span className="font-mono font-bold text-2xl text-black">YES ✓</span>
+          <div className="border-4 border-black bg-brutal-green px-4 py-2 -rotate-12 shadow-brutal relative overflow-hidden">
+            <span className="font-mono font-bold text-2xl text-black relative z-10">YES ✓</span>
+            {/* Animated glow */}
+            <div className="absolute inset-0 bg-white opacity-30 animate-pulse" />
           </div>
         </motion.div>
 
@@ -125,8 +127,10 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
           className="overlay-no absolute inset-0 pointer-events-none flex items-start justify-start p-5"
           style={{ opacity: noOpacity }}
         >
-          <div className="border-4 border-black bg-brutal-red px-4 py-2 rotate-12 shadow-brutal">
-            <span className="font-mono font-bold text-2xl text-white">NO ✗</span>
+          <div className="border-4 border-black bg-brutal-red px-4 py-2 rotate-12 shadow-brutal relative overflow-hidden">
+            <span className="font-mono font-bold text-2xl text-white relative z-10">NO ✗</span>
+            {/* Animated glow */}
+            <div className="absolute inset-0 bg-white opacity-30 animate-pulse" />
           </div>
         </motion.div>
 
@@ -135,8 +139,10 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
           className="overlay-skip absolute inset-0 pointer-events-none flex items-end justify-center pb-6"
           style={{ opacity: skipOpacity }}
         >
-          <div className="border-4 border-black bg-brutal-orange px-4 py-2 shadow-brutal">
-            <span className="font-mono font-bold text-xl text-black">SKIP ↓</span>
+          <div className="border-4 border-black bg-brutal-orange px-4 py-2 shadow-brutal relative overflow-hidden">
+            <span className="font-mono font-bold text-xl text-black relative z-10">SKIP ↓</span>
+            {/* Animated glow */}
+            <div className="absolute inset-0 bg-white opacity-30 animate-pulse" />
           </div>
         </motion.div>
 
@@ -145,19 +151,21 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
           {/* Top row */}
           <div className="flex items-center justify-between">
             <span
-              className="brutal-tag animate-float"
+              className="brutal-tag animate-float relative overflow-hidden group/tag"
               style={{ backgroundColor: colors.accent, color: "#0A0A0A" }}
             >
-              {CATEGORY_EMOJI[event.category]} {event.category.toUpperCase()}
+              <span className="relative z-10">{CATEGORY_EMOJI[event.category]} {event.category.toUpperCase()}</span>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover/tag:opacity-20 animate-pulse" />
             </span>
-            <span className="font-mono text-xs border-2 border-black bg-white text-black px-2 py-0.5 animate-pulse-glow">
-              ⏱ {timeLeft()}
+            <span className="font-mono text-xs border-2 border-black bg-white text-black px-2 py-0.5 animate-pulse-glow relative overflow-hidden group/time">
+              <span className="relative z-10">⏱ {timeLeft()}</span>
+              <div className="absolute inset-0 bg-brutal-orange opacity-0 group-hover/time:opacity-20 transition-opacity" />
             </span>
           </div>
 
           {/* Question */}
           <div className="flex-1 flex items-center py-2">
-            <h2 className="font-mono font-bold text-[1.6rem] leading-tight" style={{ color: colors.text }}>
+            <h2 className="font-mono font-bold text-[1.6rem] leading-tight hover:scale-[1.02] transition-transform cursor-pointer" style={{ color: colors.text }}>
               {event.question}
             </h2>
           </div>
@@ -165,8 +173,8 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
           {/* Sentiment bar */}
           <div>
             <div className="flex justify-between font-mono text-xs mb-1 font-bold">
-              <span style={{ color: "#00AA55" }}>YES {yesPct}%</span>
-              <span style={{ color: "#CC0033" }}>NO {100 - yesPct}%</span>
+              <span style={{ color: "#00AA55" }} className="animate-pulse-scale inline-block">YES {yesPct}%</span>
+              <span style={{ color: "#CC0033" }} className="animate-pulse-scale inline-block">NO {100 - yesPct}%</span>
             </div>
             <div className="h-4 border-3 border-black bg-white overflow-hidden relative group">
               <div
@@ -174,11 +182,13 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
                 style={{ width: `${yesPct}%`, backgroundColor: "#00FF87" }}
               >
                 <div className="absolute inset-0 animate-shimmer opacity-0 group-hover:opacity-100" />
+                {/* Pulse effect */}
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 animate-pulse" />
               </div>
             </div>
             <div className="flex justify-between font-mono text-xs mt-1 opacity-60">
-              <span>{event.yesCount} players</span>
-              <span>{event.noCount} players</span>
+              <span className="hover:text-brutal-green transition-colors">{event.yesCount} players</span>
+              <span className="hover:text-brutal-red transition-colors">{event.noCount} players</span>
             </div>
           </div>
 
@@ -186,19 +196,19 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
           <div
             className="border-t-3 border-black pt-4 flex items-center justify-between"
           >
-            <div>
+            <div className="group/stake">
               <p className="font-mono text-xs opacity-60 uppercase">Your Stake</p>
-              <p className="font-mono font-bold text-2xl">{stakeAmount} OCT</p>
+              <p className="font-mono font-bold text-2xl group-hover/stake:scale-110 transition-transform inline-block">{stakeAmount} OCT</p>
             </div>
-            <div className="text-right">
+            <div className="text-right group/win">
               <p className="font-mono text-xs opacity-60 uppercase">Potential Win</p>
-              <p className="font-mono font-bold text-2xl">~{(stakeAmount * 1.9).toFixed(1)} OCT</p>
+              <p className="font-mono font-bold text-2xl text-brutal-green group-hover/win:scale-110 transition-transform inline-block animate-pulse-scale">~{(stakeAmount * 1.9).toFixed(1)} OCT</p>
             </div>
           </div>
 
           {/* Tap hint */}
-          <p className="font-mono text-xs text-center opacity-40 border-t-2 border-black pt-2 relative">
-            <span className="relative z-10">TAP FOR DETAILS · DRAG TO PREDICT</span>
+          <p className="font-mono text-xs text-center opacity-40 border-t-2 border-black pt-2 relative group/hint">
+            <span className="relative z-10 group-hover/hint:opacity-100 transition-opacity">TAP FOR DETAILS · DRAG TO PREDICT</span>
             {/* Animated dots */}
             <span className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
               <span className="w-1 h-1 bg-current rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
@@ -215,11 +225,13 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
             { label: "↑ 3×",   color: "#FF6B00" },
             { label: "↓ SKIP", color: "#888888" },
             { label: "YES →",  color: "#00AA55" },
-          ].map((h) => (
-            <div key={h.label} className="py-2 text-center group cursor-pointer hover:bg-black/5 transition-colors">
-              <span className="font-mono text-xs font-bold group-hover:scale-110 inline-block transition-transform" style={{ color: h.color }}>
+          ].map((h, i) => (
+            <div key={h.label} className="py-2 text-center group cursor-pointer hover:bg-black/5 transition-colors relative overflow-hidden" style={{ animationDelay: `${i * 0.05}s` }}>
+              <span className="font-mono text-xs font-bold group-hover:scale-110 inline-block transition-transform relative z-10" style={{ color: h.color }}>
                 {h.label}
               </span>
+              {/* Hover bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: h.color }} />
             </div>
           ))}
         </div>
@@ -318,19 +330,23 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
 
         {/* ── Tabs ── */}
         <div className="border-b-3 border-black grid grid-cols-2 divide-x-3 divide-black flex-shrink-0">
-          {(["info", "news"] as const).map((tab) => (
+          {(["info", "news"] as const).map((tab, i) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`py-2 font-mono text-xs font-bold uppercase transition-all relative overflow-hidden group
+              className={`py-2 font-mono text-xs font-bold uppercase transition-all relative overflow-hidden group/tab
                 ${activeTab === tab
                   ? "bg-black text-brutal-yellow"
                   : "bg-white text-black hover:bg-brutal-yellow hover:text-black"
                 }`}
+              style={{ animationDelay: `${i * 0.05}s` }}
             >
               <span className="relative z-10">{tab === "info" ? "📊 MARKET INFO" : "📰 RELATED NEWS"}</span>
               {activeTab !== tab && (
-                <span className="absolute inset-0 bg-brutal-yellow transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
+                <span className="absolute inset-0 bg-brutal-yellow transform -translate-x-full group-hover/tab:translate-x-0 transition-transform duration-300" />
+              )}
+              {activeTab === tab && (
+                <div className="absolute bottom-0 left-0 right-0 h-1 bg-brutal-yellow animate-shimmer" />
               )}
             </button>
           ))}
@@ -341,21 +357,30 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
           {activeTab === "info" ? (
             <div className="p-4 space-y-4">
               {/* Context blurb */}
-              <div className="border-2 border-black bg-white p-3 shadow-brutal hover:shadow-brutal-lg transition-all">
-                <p className="font-mono text-xs text-black/40 uppercase mb-1 font-bold">📌 Context</p>
-                <p className="text-sm text-black leading-relaxed">{event.context}</p>
+              <div className="border-2 border-black bg-white p-3 shadow-brutal hover:shadow-brutal-lg transition-all animate-fade-in-up relative overflow-hidden group/context">
+                {/* Hover glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-brutal-cyan/0 to-brutal-pink/0 group-hover/context:from-brutal-cyan/10 group-hover/context:to-brutal-pink/10 transition-all duration-500" />
+                
+                <p className="font-mono text-xs text-black/40 uppercase mb-1 font-bold flex items-center gap-1 relative z-10">
+                  <span className="inline-block animate-bounce-subtle">📌</span>
+                  Context
+                </p>
+                <p className="text-sm text-black leading-relaxed relative z-10">{event.context}</p>
               </div>
 
               {/* Stats grid */}
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { label: "ENDS",     value: timeLeft },
-                  { label: "PLAYERS",  value: totalVotes.toString() },
-                  { label: "AVG STAKE",value: "42 OCT" },
+                  { label: "ENDS",     value: timeLeft, icon: "⏱" },
+                  { label: "PLAYERS",  value: totalVotes.toString(), icon: "👥" },
+                  { label: "AVG STAKE",value: "42 OCT", icon: "💰" },
                 ].map((s, i) => (
-                  <div key={s.label} className={`border-2 border-black bg-white p-2 text-center shadow-brutal hover:shadow-brutal-lg hover:-translate-y-0.5 transition-all cursor-pointer stagger-${i + 1}`}>
-                    <p className="font-mono text-xs text-black/40 uppercase">{s.label}</p>
-                    <p className="font-mono font-bold text-sm text-black">{s.value}</p>
+                  <div key={s.label} className={`border-2 border-black bg-white p-2 text-center shadow-brutal hover:shadow-brutal-lg hover:-translate-y-0.5 transition-all cursor-pointer animate-pop-in relative overflow-hidden group/stat`} style={{ animationDelay: `${i * 0.05}s` }}>
+                    <div className="absolute top-1 right-1 opacity-30 group-hover/stat:scale-125 transition-transform">
+                      <span className="text-xs">{s.icon}</span>
+                    </div>
+                    <p className="font-mono text-xs text-black/40 uppercase relative z-10">{s.label}</p>
+                    <p className="font-mono font-bold text-sm text-black relative z-10 group-hover/stat:scale-110 transition-transform inline-block">{s.value}</p>
                   </div>
                 ))}
               </div>
@@ -363,38 +388,43 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
               {/* Sentiment bar */}
               <div>
                 <div className="flex justify-between font-mono text-xs font-bold mb-1">
-                  <span style={{ color: "#00AA55" }}>YES {yesPct}%</span>
-                  <span style={{ color: "#CC0033" }}>NO {100 - yesPct}%</span>
+                  <span style={{ color: "#00AA55" }} className="animate-pulse-scale inline-block">YES {yesPct}%</span>
+                  <span style={{ color: "#CC0033" }} className="animate-pulse-scale inline-block">NO {100 - yesPct}%</span>
                 </div>
                 <div className="h-5 border-3 border-black bg-white overflow-hidden relative group">
                   <div className="h-full bg-brutal-green transition-all duration-500 relative" style={{ width: `${yesPct}%` }}>
                     <div className="absolute inset-0 animate-shimmer opacity-0 group-hover:opacity-100" />
+                    <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 animate-pulse" />
                   </div>
                 </div>
                 <div className="flex justify-between font-mono text-xs mt-1 text-black/40">
-                  <span>{event.yesCount} YES</span>
-                  <span>{event.noCount} NO</span>
+                  <span className="hover:text-brutal-green transition-colors cursor-pointer">{event.yesCount} YES</span>
+                  <span className="hover:text-brutal-red transition-colors cursor-pointer">{event.noCount} NO</span>
                 </div>
               </div>
 
               {/* Pot info */}
-              <div className="border-2 border-black bg-white p-3 shadow-brutal hover:shadow-brutal-lg transition-all">
-                <div className="flex justify-between items-center">
+              <div className="border-2 border-black bg-white p-3 shadow-brutal hover:shadow-brutal-lg transition-all relative overflow-hidden group/pot">
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-brutal-yellow/0 via-brutal-yellow/20 to-brutal-yellow/0 -translate-x-full group-hover/pot:translate-x-full transition-transform duration-1000" />
+                
+                <div className="flex justify-between items-center relative z-10">
                   <div>
                     <p className="font-mono text-xs text-black/40 uppercase">Your Stake</p>
-                    <p className="font-mono font-bold text-2xl text-black">{stakeAmount} OCT</p>
+                    <p className="font-mono font-bold text-2xl text-black hover:scale-110 transition-transform inline-block">{stakeAmount} OCT</p>
                   </div>
                   <div className="text-right">
                     <p className="font-mono text-xs text-black/40 uppercase">If You Win</p>
-                    <p className="font-mono font-bold text-2xl text-black animate-pulse">
+                    <p className="font-mono font-bold text-2xl text-black animate-pulse hover:scale-110 transition-transform inline-block">
                       ~{(stakeAmount * 1.9).toFixed(1)} OCT
                     </p>
                   </div>
                 </div>
               </div>
 
-              <p className="font-mono text-xs text-black/40 border-t-2 border-black pt-3">
-                ⚡ P2P duel on OneChain Testnet — funds locked in Move smart contract escrow.
+              <p className="font-mono text-xs text-black/40 border-t-2 border-black pt-3 flex items-center gap-1 animate-fade-in-up">
+                <span className="inline-block animate-pulse-scale">⚡</span>
+                P2P duel on OneChain Testnet — funds locked in Move smart contract escrow.
               </p>
             </div>
           ) : (
@@ -402,15 +432,16 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
               {loading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className={`border-2 border-black bg-white p-3 animate-pulse stagger-${i}`}>
-                      <div className="h-3 bg-black/10 rounded mb-2 w-3/4" />
+                    <div key={i} className={`border-2 border-black bg-white p-3 animate-pulse relative overflow-hidden`} style={{ animationDelay: `${i * 0.1}s` }}>
+                      <div className="h-3 bg-black/10 rounded mb-2 w-3/4 animate-shimmer" />
                       <div className="h-2 bg-black/10 rounded w-full mb-1" />
                       <div className="h-2 bg-black/10 rounded w-2/3" />
                     </div>
                   ))}
                 </div>
               ) : news.length === 0 ? (
-                <div className="border-2 border-black bg-white p-4 text-center hover:shadow-brutal transition-all">
+                <div className="border-2 border-black bg-white p-4 text-center hover:shadow-brutal transition-all animate-fade-in-up">
+                  <div className="text-4xl mb-2 animate-bounce-subtle">📰</div>
                   <p className="font-mono text-sm text-black/40">No news found for this market.</p>
                 </div>
               ) : (
@@ -420,21 +451,25 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block border-2 border-black bg-white p-3 shadow-brutal hover:shadow-brutal-lg hover:-translate-y-1 transition-all group"
+                    className="block border-2 border-black bg-white p-3 shadow-brutal hover:shadow-brutal-lg hover:-translate-y-1 transition-all group/news animate-slide-in-left relative overflow-hidden"
+                    style={{ animationDelay: `${i * 0.1}s` }}
                   >
-                    <div className="flex items-center justify-between mb-1">
+                    {/* Hover background */}
+                    <div className="absolute inset-0 bg-brutal-yellow opacity-0 group-hover/news:opacity-10 transition-opacity" />
+                    
+                    <div className="flex items-center justify-between mb-1 relative z-10">
                       <span className="brutal-tag bg-black text-white text-[10px]">
                         {item.source}
                       </span>
                       <span className="font-mono text-[10px] text-black/30">{item.publishedAt}</span>
                     </div>
-                    <p className="font-mono font-bold text-sm text-black leading-snug mb-1 group-hover:text-brutal-purple transition-colors">
+                    <p className="font-mono font-bold text-sm text-black leading-snug mb-1 group-hover/news:text-brutal-purple transition-colors relative z-10">
                       {item.title}
                     </p>
-                    <p className="text-xs text-black/60 leading-relaxed line-clamp-2">
+                    <p className="text-xs text-black/60 leading-relaxed line-clamp-2 relative z-10">
                       {item.description}
                     </p>
-                    <p className="font-mono text-[10px] text-brutal-purple mt-1 group-hover:translate-x-1 transition-transform inline-block">READ MORE ↗</p>
+                    <p className="font-mono text-[10px] text-brutal-purple mt-1 group-hover/news:translate-x-1 transition-transform inline-block relative z-10">READ MORE ↗</p>
                   </a>
                 ))
               )}
@@ -450,15 +485,17 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
         <div className="border-t-3 border-black grid grid-cols-2 divide-x-3 divide-black flex-shrink-0">
           <button
             onClick={() => onBet(false)}
-            className="py-4 font-mono font-bold text-lg bg-brutal-red text-white hover:opacity-90 transition-all hover:scale-105 active:scale-95"
+            className="py-4 font-mono font-bold text-lg bg-brutal-red text-white hover:opacity-90 transition-all hover:scale-105 active:scale-95 relative overflow-hidden group/no"
           >
-            ✗ BET NO
+            <span className="relative z-10">✗ BET NO</span>
+            <div className="absolute inset-0 bg-white opacity-0 group-hover/no:opacity-20 animate-pulse" />
           </button>
           <button
             onClick={() => onBet(true)}
-            className="py-4 font-mono font-bold text-lg bg-brutal-green text-black hover:opacity-90 transition-all hover:scale-105 active:scale-95"
+            className="py-4 font-mono font-bold text-lg bg-brutal-green text-black hover:opacity-90 transition-all hover:scale-105 active:scale-95 relative overflow-hidden group/yes"
           >
-            ✓ BET YES
+            <span className="relative z-10">✓ BET YES</span>
+            <div className="absolute inset-0 bg-white opacity-0 group-hover/yes:opacity-20 animate-pulse" />
           </button>
         </div>
       </motion.div>

@@ -1,8 +1,0 @@
-{
-  "buildCommand": "cd frontend && pnpm install && pnpm build",
-  "outputDirectory": "frontend/.next",
-  "devCommand": "cd frontend && pnpm dev",
-  "installCommand": "cd frontend && pnpm install",
-  "framework": "nextjs",
-  "regions": ["sin1"]
-}
