@@ -42,7 +42,7 @@ const config: Config = {
       borderWidth: { "3": "3px" },
     },
   },
-  plugins: ["@tailwindcss/line-clamp"],
+  plugins: [],
 };
 
 export default config;
