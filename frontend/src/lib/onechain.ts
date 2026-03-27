@@ -162,8 +162,8 @@ export async function getOnChainEvents() {
   return events.data;
 }
 
-/** Fetch PredictionEvent shared objects via BetPlaced events (correct event type) */
-export async function fetchPredictionEvents(): Promise<Array<{
+/** Fetch all PredictionEvent objects from EventRegistry */
+export async function fetchAllEvents(): Promise<Array<{
   id: string;
   question: string;
   category: string;
@@ -174,19 +174,38 @@ export async function fetchPredictionEvents(): Promise<Array<{
   noCount: number;
 }>> {
   try {
-    // Query objects of type PredictionEvent from the package
-    const result = await suiClient.queryEvents({
-      query: { MoveModule: { package: PACKAGE_ID, module: "prediction_event" } },
+    // Get EventRegistry to find event_count
+    const registry = await suiClient.getObject({
+      id: EVENT_REGISTRY_ID,
+      options: { showContent: true },
+    });
+    const regFields = (registry.data?.content as { fields: Record<string, unknown> } | undefined)?.fields;
+    const eventCount = Number(regFields?.event_count ?? 0);
+    if (eventCount === 0) return [];
+
+    // Query all objects of type PredictionEvent owned by the package
+    // Use queryTransactionBlocks to find created PredictionEvent objects
+    const txs = await suiClient.queryTransactionBlocks({
+      filter: { InputObject: EVENT_REGISTRY_ID },
       limit: 50,
       order: "descending",
+      options: { showObjectChanges: true },
     });
 
-    // Collect unique event object IDs from BetPlaced / DuelMatched events
+    // Collect PredictionEvent object IDs from tx results
     const eventIds = new Set<string>();
-    result.data.forEach((e) => {
-      const p = e.parsedJson as Record<string, unknown> | undefined;
-      if (p?.event_id) eventIds.add(String(p.event_id));
-    });
+    for (const tx of txs.data) {
+      for (const change of tx.objectChanges ?? []) {
+        if (
+          "objectType" in change &&
+          typeof change.objectType === "string" &&
+          change.objectType.includes("::prediction_event::PredictionEvent") &&
+          "objectId" in change
+        ) {
+          eventIds.add(change.objectId);
+        }
+      }
+    }
 
     if (eventIds.size === 0) return [];
 
@@ -195,21 +214,28 @@ export async function fetchPredictionEvents(): Promise<Array<{
       options: { showContent: true },
     });
 
+    const parseStr = (v: unknown): string => {
+      if (typeof v === "string") return v;
+      if (v && typeof v === "object" && "bytes" in v) return String((v as { bytes: string }).bytes);
+      return "";
+    };
+
     return objects
       .filter((o) => o.data?.content?.dataType === "moveObject")
       .map((o) => {
         const f = (o.data!.content as { fields: Record<string, unknown> }).fields;
         return {
           id: o.data!.objectId,
-          question: String(f.question ?? ""),
-          category: String(f.category ?? ""),
+          question: parseStr(f.question),
+          category: parseStr(f.category),
           endTime: Number(f.end_time ?? 0),
           creator: String(f.creator ?? ""),
           status: Number(f.status ?? 0),
           yesCount: Number(f.yes_count ?? 0),
           noCount: Number(f.no_count ?? 0),
         };
-      });
+      })
+      .filter((e) => e.status === 0); // Only open events
   } catch {
     return [];
   }

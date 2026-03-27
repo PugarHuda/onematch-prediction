@@ -11,7 +11,8 @@ import { TokenSwapWidget } from "@/components/TokenSwapWidget";
 import { ToastContainer } from "@/components/Toast";
 import { useAppStore } from "@/lib/store";
 import { MOCK_EVENTS } from "@/lib/types";
-import { buildPlaceBetTx, octToMist } from "@/lib/onechain";
+import type { PredictionEvent } from "@/lib/types";
+import { buildPlaceBetTx, octToMist, fetchAllEvents } from "@/lib/onechain";
 import { useOneChainTx } from "@/lib/useOneChainTx";
 import Link from "next/link";
 
@@ -38,11 +39,43 @@ export default function FeedPage() {
 
   const [lastAction, setLastAction] = useState<{ dir: SwipeDir; question: string } | null>(null);
   const [txPending, setTxPending]   = useState(false);
-  const [betCount, setBetCount]     = useState(0); // only actual bets (not skips)
-  // track base color index so stack colors shift after each swipe
+  const [betCount, setBetCount]     = useState(0);
   const [colorBase, setColorBase]   = useState(0);
+  const [chainEvents, setChainEvents] = useState<PredictionEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
-  const remaining = MOCK_EVENTS.filter((e) => !swipedIds.has(e.id));
+  // Fetch events from chain on mount + poll every 15s
+  useEffect(() => {
+    let mounted = true;
+    const load = () => {
+      fetchAllEvents().then((events) => {
+        if (!mounted) return;
+        if (events.length > 0) {
+          const mapped: PredictionEvent[] = events.map((e) => ({
+            id: e.id,
+            question: e.question,
+            category: e.category || "crypto",
+            endTime: e.endTime,
+            creator: e.creator,
+            status: "open",
+            yesCount: e.yesCount,
+            noCount: e.noCount,
+            newsKeywords: e.question.split(" ").slice(0, 4).join(" "),
+            context: `On-chain prediction event. ${e.yesCount + e.noCount} total votes so far.`,
+          }));
+          setChainEvents(mapped);
+        }
+        setLoadingEvents(false);
+      }).catch(() => setLoadingEvents(false));
+    };
+    load();
+    const interval = setInterval(load, 15000); // Poll every 15s
+    return () => { mounted = false; clearInterval(interval); };
+  }, []);
+
+  // Use chain events if available, fallback to MOCK_EVENTS
+  const allEvents = chainEvents.length > 0 ? chainEvents : MOCK_EVENTS;
+  const remaining = allEvents.filter((e) => !swipedIds.has(e.id));
 
   const handleSwipe = useCallback(
     (direction: SwipeDir) => {
@@ -184,13 +217,21 @@ export default function FeedPage() {
                 {/* Progress indicator */}
                 <div className="border-2 border-black bg-white px-2 py-1 shadow-brutal">
                   <span className="font-mono text-xs font-bold text-black">
-                    {MOCK_EVENTS.length - remaining.length}/{MOCK_EVENTS.length}
+                    {allEvents.length - remaining.length}/{allEvents.length}
+                    {chainEvents.length > 0 && <span className="text-brutal-green ml-1">● LIVE</span>}
                   </span>
                 </div>
               </div>
             </div>
 
-            {remaining.length > 0 ? (
+            {loadingEvents ? (
+              <div className="border-3 border-black bg-white shadow-brutal flex items-center justify-center" style={{ height: 560 }}>
+                <div className="text-center">
+                  <div className="w-12 h-12 border-3 border-black border-t-brutal-yellow animate-spin mx-auto mb-3 rounded-full" />
+                  <p className="font-mono text-sm text-black/40">Loading events from OneChain…</p>
+                </div>
+              </div>
+            ) : remaining.length > 0 ? (
               <div className="relative" style={{ height: 560 }}>
                 <AnimatePresence mode="popLayout">
                   {remaining.slice(0, 4).map((event, i) => (
