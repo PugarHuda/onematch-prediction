@@ -6,17 +6,15 @@ import { getFullnodeUrl } from "@onelabs/sui/client";
 import { useState } from "react";
 import "@onelabs/dapp-kit/dist/index.css";
 
-const networks = {
-  testnet: { url: "https://rpc-testnet.onelabs.cc:443" },
-};
+// Exactly as per OneChain docs
+const queryClient = new QueryClient();
+const suiClient = { url: getFullnodeUrl("testnet") };
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
-
   return (
     <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networks} defaultNetwork="testnet">
-        <WalletProvider autoConnect>
+      <SuiClientProvider networks={{ testnet: suiClient }} defaultNetwork="testnet">
+        <WalletProvider>
           {children}
         </WalletProvider>
       </SuiClientProvider>

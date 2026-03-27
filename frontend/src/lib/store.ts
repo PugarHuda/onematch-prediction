@@ -29,7 +29,7 @@ export const useAppStore = create<AppStore>((set) => ({
   profile: null,
   setProfile: (p) => set({ profile: p }),
 
-  stakeAmount: 10,
+  stakeAmount: 0.1,
   setStakeAmount: (n) => set({ stakeAmount: n }),
 
   matchData: null,

@@ -1,15 +1,11 @@
 module onematch::prediction_event {
     use std::string::String;
-    use one::object::{Self, UID, ID};
-    use one::tx_context::TxContext;
-    use one::transfer;
-    use one::table::{Self, Table};
     use one::clock::Clock;
 
     // === Errors ===
     const EEventNotOpen: u64 = 0;
     const EEventNotExpired: u64 = 1;
-    const EUnauthorized: u64 = 2;
+    const EEventExpired: u64 = 3;
 
     // === Structs ===
 
@@ -49,6 +45,14 @@ module onematch::prediction_event {
         transfer::transfer(admin, ctx.sender());
     }
 
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) { init(ctx); }
+
+    // expose error codes for tests
+    #[test_only] public fun e_event_not_open(): u64 { EEventNotOpen }
+    #[test_only] public fun e_event_not_expired(): u64 { EEventNotExpired }
+    #[test_only] public fun e_event_expired(): u64 { EEventExpired }
+
     // === Public Functions ===
 
     public fun create_event(
@@ -74,13 +78,15 @@ module onematch::prediction_event {
         event_id
     }
 
-    public fun increment_yes(event: &mut PredictionEvent) {
+    public fun increment_yes(event: &mut PredictionEvent, clock: &Clock) {
         assert!(event.status == 0, EEventNotOpen);
+        assert!(one::clock::timestamp_ms(clock) < event.end_time, EEventExpired);
         event.yes_count = event.yes_count + 1;
     }
 
-    public fun increment_no(event: &mut PredictionEvent) {
+    public fun increment_no(event: &mut PredictionEvent, clock: &Clock) {
         assert!(event.status == 0, EEventNotOpen);
+        assert!(one::clock::timestamp_ms(clock) < event.end_time, EEventExpired);
         event.no_count = event.no_count + 1;
     }
 
@@ -111,13 +117,27 @@ module onematch::prediction_event {
             event.status = 2; // NO wins
         }
     }
+    
+    /// Admin cancels an event (emergency only)
+    public fun cancel_event(
+        _cap: &AdminCap,
+        event: &mut PredictionEvent,
+    ) {
+        assert!(event.status == 0, EEventNotOpen);
+        event.status = 3; // cancelled
+    }
 
     // === Accessors ===
 
     public fun is_open(event: &PredictionEvent): bool { event.status == 0 }
     public fun yes_wins(event: &PredictionEvent): bool { event.status == 1 }
     public fun no_wins(event: &PredictionEvent): bool { event.status == 2 }
+    public fun is_cancelled(event: &PredictionEvent): bool { event.status == 3 }
     public fun status(event: &PredictionEvent): u8 { event.status }
     public fun end_time(event: &PredictionEvent): u64 { event.end_time }
     public fun event_id(event: &PredictionEvent): ID { object::id(event) }
+    public fun question(event: &PredictionEvent): &String { &event.question }
+    public fun category(event: &PredictionEvent): &String { &event.category }
+    public fun yes_count(event: &PredictionEvent): u64 { event.yes_count }
+    public fun no_count(event: &PredictionEvent): u64 { event.no_count }
 }

@@ -2,23 +2,23 @@ import Link from "next/link";
 import { Header } from "@/components/Header";
 
 const STEPS = [
-  { n: "01", title: "SWIPE",  desc: "Browse events one card at a time. Right = YES, Left = NO, Up = YES×3, Down = Skip.",  bg: "#FFE500", icon: "🃏" },
-  { n: "02", title: "MATCH",  desc: "AI matches you with a real opponent who took the opposite side. Funds locked in escrow.", bg: "#FF3CAC", icon: "⚔️" },
-  { n: "03", title: "WIN",    desc: "Event settles on-chain. Smart contract pays winner 95% of pot. Reputation updates.",     bg: "#00FF87", icon: "🏆" },
+  { n: "01", title: "SWIPE",  desc: "Browse events one card at a time. Right = YES, Left = NO, Up = YES×3, Down = Skip.",  bg: "#FFE500", icon: "🃏", iconAnim: "animate-levitate" },
+  { n: "02", title: "MATCH",  desc: "AI matches you with a real opponent who took the opposite side. Funds locked in escrow.", bg: "#FF3CAC", icon: "⚔️", iconAnim: "animate-sword-clash" },
+  { n: "03", title: "WIN",    desc: "Event settles on-chain. Smart contract pays winner 95% of pot. Reputation updates.",     bg: "#00FF87", icon: "🏆", iconAnim: "animate-trophy-bounce" },
 ];
 
 const STATS = [
-  { label: "ACTIVE DUELS", value: "1,247", icon: "⚔️", color: "#FFE500" },
-  { label: "TOTAL POT",    value: "84,320 OCT", icon: "💰", color: "#00FF87" },
-  { label: "USERS",        value: "3,891", icon: "👥", color: "#4DFFFF" },
-  { label: "SETTLED",      value: "12,043", icon: "✓", color: "#FF3CAC" },
+  { label: "ACTIVE DUELS", value: "1,247", icon: "⚔️", color: "#FFE500", iconAnim: "animate-sword-clash" },
+  { label: "TOTAL POT",    value: "84,320 OCT", icon: "🪙", color: "#00FF87", iconAnim: "animate-coin-flip" },
+  { label: "USERS",        value: "3,891", icon: "👥", color: "#4DFFFF", iconAnim: "animate-bounce-subtle" },
+  { label: "SETTLED",      value: "12,043", icon: "✅", color: "#FF3CAC", iconAnim: "animate-tada" },
 ];
 
 const FEATURES = [
-  { icon: "🔐", title: "TRUSTLESS", desc: "Smart contract escrow, no middleman" },
-  { icon: "⚡", title: "INSTANT", desc: "Real-time matching & settlement" },
-  { icon: "🎯", title: "FAIR", desc: "Transparent odds, on-chain verification" },
-  { icon: "🏆", title: "REPUTATION", desc: "Build your OneID profile & badges" },
+  { icon: "🔐", title: "TRUSTLESS", desc: "Smart contract escrow, no middleman", iconAnim: "animate-wobble" },
+  { icon: "⚡", title: "INSTANT", desc: "Real-time matching & settlement", iconAnim: "animate-streak-fire" },
+  { icon: "🎯", title: "FAIR", desc: "Transparent odds, on-chain verification", iconAnim: "animate-spin-slow" },
+  { icon: "🏆", title: "REPUTATION", desc: "Build your OneID profile & badges", iconAnim: "animate-trophy-bounce" },
 ];
 
 export default function HomePage() {
@@ -119,7 +119,7 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               {/* Icon badge */}
-              <div className="absolute top-3 right-3 text-3xl opacity-20 group-hover:opacity-40 group-hover:scale-125 transition-all">
+              <div className={`absolute top-3 right-3 text-3xl opacity-20 group-hover:opacity-60 group-hover:scale-125 transition-all ${s.iconAnim}`}>
                 {s.icon}
               </div>
               
@@ -146,7 +146,7 @@ export default function HomePage() {
           {STATS.map((s, i) => (
             <div key={s.label} className="p-5 text-center hover:bg-brutal-yellow/10 transition-all group cursor-pointer relative z-10 spotlight" style={{ animationDelay: `${i * 0.1}s` }}>
               {/* Icon */}
-              <div className="text-2xl mb-1 opacity-50 group-hover:opacity-100 group-hover:scale-125 transition-all inline-block" style={{ color: s.color }}>
+              <div className={`text-2xl mb-1 opacity-50 group-hover:opacity-100 group-hover:scale-125 transition-all inline-block ${s.iconAnim}`} style={{ color: s.color }}>
                 {s.icon}
               </div>
               <p className="font-mono font-bold text-3xl text-brutal-yellow group-hover:scale-125 transition-transform inline-block group-hover:animate-neon duration-300">{s.value}</p>
@@ -170,7 +170,7 @@ export default function HomePage() {
               {/* Hover background */}
               <div className="absolute inset-0 bg-brutal-yellow opacity-0 group-hover:opacity-20 transition-opacity" />
               
-              <div className="text-3xl mb-2 group-hover:scale-125 group-hover:rotate-6 transition-all inline-block relative z-10">
+              <div className={`text-3xl mb-2 group-hover:scale-125 group-hover:rotate-6 transition-all inline-block relative z-10 ${f.iconAnim}`}>
                 {f.icon}
               </div>
               <p className="font-mono font-bold text-sm text-black mb-1 relative z-10 group-hover:text-brutal-purple transition-colors">{f.title}</p>

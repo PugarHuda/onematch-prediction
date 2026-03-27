@@ -181,13 +181,6 @@
 }
 .animate-wiggle { animation: wiggle 0.3s ease-in-out; }
 
-/* Bounce subtle */
-@keyframes bounce-subtle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-.animate-bounce-subtle { animation: bounce-subtle 1s ease-in-out infinite; }
-
 /* Shimmer effect */
 @keyframes shimmer {
   0% { background-position: -200% center; }
@@ -772,4 +765,254 @@ a {
 }
 .animate-attention {
   animation: attention 1s ease-in-out;
+}
+
+/* ── Icon & Emoji Animations ─────────────────────────────────────── */
+
+/* Spin slow — for loading/processing icons */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+
+/* Wobble — for interactive icons */
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  15%       { transform: rotate(-8deg) scale(1.1); }
+  30%       { transform: rotate(6deg) scale(1.05); }
+  45%       { transform: rotate(-4deg) scale(1.08); }
+  60%       { transform: rotate(3deg) scale(1.03); }
+  75%       { transform: rotate(-2deg) scale(1.01); }
+}
+.animate-wobble { animation: wobble 0.7s ease-in-out; }
+.group:hover .group-hover\:animate-wobble { animation: wobble 0.7s ease-in-out; }
+
+/* Tada — for achievement/win icons */
+@keyframes tada {
+  0%   { transform: scale(1) rotate(0deg); }
+  10%  { transform: scale(0.9) rotate(-3deg); }
+  20%  { transform: scale(1.2) rotate(3deg); }
+  30%  { transform: scale(1.2) rotate(-3deg); }
+  40%  { transform: scale(1.2) rotate(3deg); }
+  50%  { transform: scale(1.2) rotate(-3deg); }
+  60%  { transform: scale(1.2) rotate(3deg); }
+  70%  { transform: scale(1.2) rotate(-3deg); }
+  80%  { transform: scale(1.1) rotate(0deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.animate-tada { animation: tada 1s ease-in-out; }
+
+/* Rubber band — for button press */
+@keyframes rubber-band {
+  0%   { transform: scale(1); }
+  30%  { transform: scaleX(1.25) scaleY(0.75); }
+  40%  { transform: scaleX(0.75) scaleY(1.25); }
+  50%  { transform: scaleX(1.15) scaleY(0.85); }
+  65%  { transform: scaleX(0.95) scaleY(1.05); }
+  75%  { transform: scaleX(1.05) scaleY(0.95); }
+  100% { transform: scale(1); }
+}
+.animate-rubber-band { animation: rubber-band 0.6s ease-in-out; }
+
+/* Ping expand — for live/online indicators */
+@keyframes ping-expand {
+  0%   { transform: scale(1); opacity: 1; }
+  75%, 100% { transform: scale(2.5); opacity: 0; }
+}
+.animate-ping-expand { animation: ping-expand 1.5s cubic-bezier(0,0,0.2,1) infinite; }
+
+/* Morph — smooth shape transition for icons */
+@keyframes morph {
+  0%, 100% { border-radius: 0; }
+  50%       { border-radius: 50%; }
+}
+.animate-morph { animation: morph 2s ease-in-out infinite; }
+
+/* Levitate — smoother float for cards */
+@keyframes levitate {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  25%       { transform: translateY(-6px) rotate(0.5deg) scale(1.01); }
+  75%       { transform: translateY(-3px) rotate(-0.5deg) scale(1.005); }
+}
+.animate-levitate { animation: levitate 4s ease-in-out infinite; }
+
+/* Streak fire — for hot streak indicators */
+@keyframes streak-fire {
+  0%, 100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+  25%       { transform: scale(1.15) rotate(-5deg); filter: brightness(1.2); }
+  50%       { transform: scale(1.2) rotate(5deg); filter: brightness(1.4); }
+  75%       { transform: scale(1.1) rotate(-3deg); filter: brightness(1.1); }
+}
+.animate-streak-fire { animation: streak-fire 0.8s ease-in-out infinite; }
+
+/* Coin flip — for OCT/token icons */
+@keyframes coin-flip {
+  0%, 100% { transform: rotateY(0deg); }
+  50%       { transform: rotateY(180deg); }
+}
+.animate-coin-flip { animation: coin-flip 2s ease-in-out infinite; }
+
+/* Sword clash — for duel icons */
+@keyframes sword-clash {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  20%       { transform: rotate(-15deg) scale(1.1); }
+  40%       { transform: rotate(15deg) scale(1.15); }
+  60%       { transform: rotate(-8deg) scale(1.05); }
+  80%       { transform: rotate(8deg) scale(1.08); }
+}
+.animate-sword-clash { animation: sword-clash 1.2s ease-in-out infinite; }
+
+/* Trophy bounce — for win states */
+@keyframes trophy-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  20%       { transform: translateY(-12px) scale(1.1); }
+  40%       { transform: translateY(-6px) scale(1.05); }
+  60%       { transform: translateY(-10px) scale(1.08); }
+  80%       { transform: translateY(-4px) scale(1.02); }
+}
+.animate-trophy-bounce { animation: trophy-bounce 1.5s ease-in-out infinite; }
+
+/* ── Enhanced Visual Effects ─────────────────────────────────────── */
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Neon border pulse */
+@keyframes neon-border {
+  0%, 100% { box-shadow: 0 0 5px #FFE500, 0 0 10px #FFE500, inset 0 0 5px rgba(255,229,0,0.1); }
+  50%       { box-shadow: 0 0 10px #FFE500, 0 0 25px #FFE500, 0 0 40px #FFE500, inset 0 0 10px rgba(255,229,0,0.2); }
+}
+.animate-neon-border { animation: neon-border 2s ease-in-out infinite; }
+
+/* Scanline effect for retro feel */
+.scanlines {
+  position: relative;
+}
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Holographic shimmer */
+@keyframes holo-shimmer {
+  0%   { background-position: -200% center; filter: hue-rotate(0deg); }
+  100% { background-position: 200% center; filter: hue-rotate(360deg); }
+}
+.animate-holo {
+  background: linear-gradient(90deg, #FFE500, #FF3CAC, #4DFFFF, #00FF87, #BF5FFF, #FFE500);
+  background-size: 300% 100%;
+  animation: holo-shimmer 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Depth shadow on hover */
+.depth-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.depth-hover:hover {
+  transform: translateY(-4px) translateX(-2px);
+  box-shadow: 8px 8px 0 #0A0A0A;
+}
+.depth-hover:active {
+  transform: translateY(0) translateX(0);
+  box-shadow: 2px 2px 0 #0A0A0A;
+}
+
+/* Sticker pop effect */
+.sticker {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sticker:hover {
+  transform: scale(1.15) rotate(-3deg);
+}
+
+/* Live dot indicator */
+.live-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00FF87;
+}
+.live-dot::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: #00FF87;
+  opacity: 0.4;
+  animation: ping-expand 1.5s cubic-bezier(0,0,0.2,1) infinite;
+}
+
+/* Gradient border */
+.gradient-border {
+  position: relative;
+  background: white;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #FFE500, #FF3CAC, #4DFFFF, #00FF87);
+  z-index: -1;
+  border-radius: inherit;
+  animation: gradient-shift 3s ease infinite;
+  background-size: 300% 300%;
+}
+
+/* Confetti burst */
+@keyframes confetti-burst {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translate(var(--tx, 50px), var(--ty, -80px)) rotate(var(--tr, 360deg)) scale(0); opacity: 0; }
+}
+.animate-confetti { animation: confetti-burst 0.8s ease-out forwards; }
+
+/* Typewriter cursor blink */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.animate-cursor { animation: cursor-blink 1s step-end infinite; }
+
+/* Number counter roll */
+@keyframes number-roll {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.animate-number-roll { animation: number-roll 0.3s ease-out; }
+
+/* Pulse ring */
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.animate-pulse-ring {
+  position: relative;
+}
+.animate-pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid currentColor;
+  animation: pulse-ring 1.5s ease-out infinite;
 }

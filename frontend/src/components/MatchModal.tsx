@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "@/lib/store";
+import { Swords, Bot, Shield, Trophy } from "lucide-react";
 
 export function MatchModal() {
   const matchData = useAppStore((s) => s.matchData);
@@ -55,21 +56,21 @@ export function MatchModal() {
             {/* Players */}
             <div className="p-5 flex items-center justify-between gap-3">
               <div className="flex-1 text-center group/player">
-                <div className="w-16 h-16 border-3 border-black bg-brutal-green mx-auto mb-2 flex items-center justify-center text-3xl shadow-brutal animate-float hover:rotate-6 hover:scale-110 transition-all cursor-pointer">
-                  🟢
+                <div className="w-16 h-16 border-3 border-black bg-brutal-green mx-auto mb-2 flex items-center justify-center shadow-brutal animate-levitate hover:rotate-6 hover:scale-110 transition-all cursor-pointer">
+                  <Shield size={32} strokeWidth={2} className="text-black" />
                 </div>
                 <p className="font-mono text-xs font-bold text-black group-hover/player:text-brutal-green transition-colors">YOU</p>
                 <p className="font-mono text-xs text-black/50">YES</p>
               </div>
 
-              <div className="border-3 border-black bg-black px-3 py-2 shadow-brutal animate-pulse relative overflow-hidden">
-                <span className="font-mono font-bold text-brutal-yellow text-xl relative z-10 inline-block animate-pulse-scale">⚔️</span>
+              <div className="border-3 border-black bg-black px-3 py-2 shadow-brutal relative overflow-hidden">
+                <Swords size={24} className="text-brutal-yellow animate-sword-clash" />
                 <div className="absolute inset-0 bg-brutal-yellow opacity-0 animate-shimmer" />
               </div>
 
               <div className="flex-1 text-center group/opponent">
-                <div className="w-16 h-16 border-3 border-black bg-brutal-red mx-auto mb-2 flex items-center justify-center text-3xl shadow-brutal animate-float hover:-rotate-6 hover:scale-110 transition-all cursor-pointer" style={{ animationDelay: '0.5s' }}>
-                  🔴
+                <div className="w-16 h-16 border-3 border-black bg-brutal-red mx-auto mb-2 flex items-center justify-center shadow-brutal animate-levitate hover:-rotate-6 hover:scale-110 transition-all cursor-pointer" style={{ animationDelay: '0.5s' }}>
+                  <Bot size={32} strokeWidth={2} className="text-white" />
                 </div>
                 <p className="font-mono text-xs font-bold text-black truncate group-hover/opponent:text-brutal-red transition-colors">
                   {matchData.playerNo.slice(0, 6)}…
@@ -89,12 +90,22 @@ export function MatchModal() {
               </p>
             </div>
 
+            {/* AI Matchmaking indicator */}
+            <div className="mx-4 mb-3 border-2 border-black bg-brutal-purple p-2 shadow-brutal relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+              <p className="font-mono text-xs text-white relative z-10 flex items-center gap-2">
+                <Bot size={14} className="text-brutal-yellow flex-shrink-0" />
+                <span className="font-bold text-brutal-yellow">AI MATCHMAKER</span>
+                <span className="text-white/70">found opponent in 0.3s</span>
+                <span className="live-dot ml-auto" style={{ background: "#00FF87" }} />
+              </p>
+            </div>
+
             {/* Notice */}
             <div className="mx-4 mb-4 border-2 border-black bg-white p-2 shadow-brutal hover:shadow-brutal-lg transition-all relative overflow-hidden group/notice">
               <p className="font-mono text-xs text-black relative z-10">
                 ⚡ Funds locked in escrow. Winner takes 95% of pot.
               </p>
-              {/* Hover shine */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brutal-yellow/30 to-transparent -translate-x-full group-hover/notice:translate-x-full transition-transform duration-700" />
             </div>
 
@@ -107,10 +118,11 @@ export function MatchModal() {
                 <span className="relative z-10">DISMISS</span>
               </button>
               <button
-                className="py-3 font-mono text-sm font-bold text-black bg-brutal-green hover:opacity-80 transition-all hover:scale-105 animate-glow-pulse relative overflow-hidden group/go"
+                className="py-3 font-mono text-sm font-bold text-black bg-brutal-green hover:opacity-80 transition-all hover:scale-105 animate-glow-pulse relative overflow-hidden group/go flex items-center justify-center gap-2"
                 onClick={hideMatch}
               >
-                <span className="relative z-10">LET'S GO 🔥</span>
+                <Trophy size={16} />
+                <span className="relative z-10">LET'S GO</span>
                 <div className="absolute inset-0 bg-white opacity-0 group-hover/go:opacity-20 animate-pulse" />
               </button>
             </div>

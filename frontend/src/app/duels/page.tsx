@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCurrentAccount } from "@onelabs/dapp-kit";
 import { Header } from "@/components/Header";
 import { explorerTxUrl } from "@/lib/onechain";
 import { CATEGORY_EMOJI } from "@/lib/constants";
+import { fetchDuelsForPlayer } from "@/lib/onechain";
 import Link from "next/link";
 
 const MOCK_DUELS = [
@@ -57,6 +58,17 @@ export default function DuelsPage() {
   const account = useCurrentAccount();
   const [filter, setFilter] = useState<"all" | "active" | "settled">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [onChainCount, setOnChainCount] = useState<{ matched: number; settled: number } | null>(null);
+
+  // Fetch on-chain duel events for this player
+  useEffect(() => {
+    if (!account) return;
+    fetchDuelsForPlayer(account.address)
+      .then(({ matched, settled }) => {
+        setOnChainCount({ matched: matched.length, settled: settled.length });
+      })
+      .catch(() => {});
+  }, [account]);
 
   const filteredDuels = MOCK_DUELS.filter((duel) => {
     const matchesFilter = 
@@ -92,7 +104,7 @@ export default function DuelsPage() {
         <div className="flex items-center justify-between mb-6 animate-slide-in-left">
           <h1 className="font-mono font-bold text-3xl text-black relative group">
             <span className="relative z-10 flex items-center gap-2">
-              <span className="inline-block animate-pulse-scale">⚔️</span>
+              <span className="inline-block animate-sword-clash">⚔️</span>
               MY DUELS
             </span>
             <span className="text-brutal-pink ml-2 text-lg animate-pulse-scale inline-block">{MOCK_DUELS.length}</span>
@@ -111,12 +123,12 @@ export default function DuelsPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-brutal-yellow/0 via-brutal-yellow/20 to-brutal-yellow/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           
           {[
-            { label: "ACTIVE", value: "2", color: "text-brutal-yellow", icon: "⚔️" },
-            { label: "WON",    value: "1", color: "text-brutal-green",  icon: "🏆" },
-            { label: "LOST",   value: "0", color: "text-brutal-red",    icon: "💀" },
+            { label: "ACTIVE", value: onChainCount ? String(onChainCount.matched) : "2", color: "text-brutal-yellow", icon: "⚔️", iconAnim: "animate-sword-clash" },
+            { label: "WON",    value: "1", color: "text-brutal-green",  icon: "🏆", iconAnim: "animate-trophy-bounce" },
+            { label: "SETTLED", value: onChainCount ? String(onChainCount.settled) : "0", color: "text-brutal-red", icon: "✅", iconAnim: "animate-tada" },
           ].map((s, i) => (
             <div key={s.label} className="p-4 text-center relative z-10 hover:bg-white/5 transition-colors cursor-pointer group/stat" style={{ animationDelay: `${i * 0.1}s` }}>
-              <div className="absolute top-2 right-2 opacity-30 group-hover/stat:scale-125 transition-transform">
+              <div className={`absolute top-2 right-2 opacity-30 group-hover/stat:opacity-80 group-hover/stat:scale-125 transition-all ${s.iconAnim}`}>
                 <span className="text-lg">{s.icon}</span>
               </div>
               <p className={`font-mono font-bold text-3xl ${s.color} group-hover/stat:scale-110 transition-transform inline-block`}>{s.value}</p>

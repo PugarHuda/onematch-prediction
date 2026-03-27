@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@onelabs/dapp-kit";
+import { useCurrentAccount } from "@onelabs/dapp-kit";
 import { Header } from "@/components/Header";
 import { EventCard } from "@/components/EventCard";
 import { StakeSlider } from "@/components/StakeSlider";
@@ -12,6 +12,7 @@ import { ToastContainer } from "@/components/Toast";
 import { useAppStore } from "@/lib/store";
 import { MOCK_EVENTS } from "@/lib/types";
 import { buildPlaceBetTx, octToMist } from "@/lib/onechain";
+import { useOneChainTx } from "@/lib/useOneChainTx";
 import Link from "next/link";
 
 type SwipeDir = "left" | "right" | "up" | "down";
@@ -25,7 +26,7 @@ const DIR_LABEL: Record<SwipeDir, { text: string; color: string }> = {
 
 export default function FeedPage() {
   const account  = useCurrentAccount();
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const { mutate: signAndExecute } = useOneChainTx();
   const stakeAmount = useAppStore((s) => s.stakeAmount);
   const showMatch   = useAppStore((s) => s.showMatch);
   const swipedIds   = useAppStore((s) => s.swipedIds);
@@ -36,6 +37,7 @@ export default function FeedPage() {
 
   const [lastAction, setLastAction] = useState<{ dir: SwipeDir; question: string } | null>(null);
   const [txPending, setTxPending]   = useState(false);
+  const [betCount, setBetCount]     = useState(0); // only actual bets (not skips)
   // track base color index so stack colors shift after each swipe
   const [colorBase, setColorBase]   = useState(0);
 
@@ -58,10 +60,14 @@ export default function FeedPage() {
       const multiplier = direction === "up" ? 3 : 1;
       const finalStake = stakeAmount * multiplier;
 
+      setBetCount((c) => c + 1);
+
       const tx = buildPlaceBetTx(event.id, position, octToMist(finalStake));
       setTxPending(true);
       signAndExecute(
-        { transaction: tx },
+        {
+          transaction: tx,
+        },
         {
           onSuccess: () => {
             setTxPending(false);
@@ -320,11 +326,11 @@ export default function FeedPage() {
               </p>
               <div className="grid grid-cols-2 gap-2 relative z-10">
                 {[
-                  { label: "SWIPED",  value: swipedIds.size,                    color: "bg-brutal-yellow text-black", icon: "🃏" },
-                  { label: "OCT BET", value: stakeAmount * swipedIds.size,       color: "bg-brutal-green  text-black", icon: "💰" },
+                  { label: "SWIPED",  value: swipedIds.size,        color: "bg-brutal-yellow text-black", icon: "🃏", iconAnim: "animate-levitate" },
+                  { label: "OCT BET", value: stakeAmount * betCount, color: "bg-brutal-green  text-black", icon: "🪙", iconAnim: "animate-coin-flip" },
                 ].map((s, i) => (
                   <div key={s.label} className={`border-2 border-black p-2 text-center shadow-brutal hover:shadow-brutal-lg hover:-translate-y-0.5 transition-all cursor-pointer group/stat ${s.color} relative overflow-hidden`} style={{ animationDelay: `${i * 0.1}s` }}>
-                    <div className="absolute top-1 right-1 opacity-50 group-hover/stat:scale-125 transition-transform">
+                    <div className={`absolute top-1 right-1 opacity-50 group-hover/stat:opacity-100 group-hover/stat:scale-125 transition-all ${s.iconAnim}`}>
                       <span className="text-xs">{s.icon}</span>
                     </div>
                     <p className="font-mono font-bold text-2xl group-hover/stat:scale-110 transition-transform inline-block">{s.value}</p>

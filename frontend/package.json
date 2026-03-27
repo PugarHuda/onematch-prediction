@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mysten/sui": "^2.12.0",
     "@onelabs/dapp-kit": "latest",
     "@onelabs/sui": "latest",
     "@tanstack/react-query": "^5.0.0",

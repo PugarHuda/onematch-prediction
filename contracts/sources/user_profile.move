@@ -1,14 +1,16 @@
 module onematch::user_profile {
     use std::string::{Self, String};
-    use one::object::{Self, UID, ID};
-    use one::tx_context::TxContext;
-    use one::transfer;
     use one::table::{Self, Table};
     use one::event as one_event;
 
     // === Errors ===
     const EProfileExists: u64 = 0;
-    const EProfileNotFound: u64 = 1;
+    const EUsernameTooShort: u64 = 2;
+    const EUsernameTooLong: u64 = 3;
+
+    // === Constants ===
+    const MIN_USERNAME_LEN: u64 = 3;
+    const MAX_USERNAME_LEN: u64 = 20;
 
     // === Structs ===
 
@@ -47,13 +49,6 @@ module onematch::user_profile {
         username: String,
     }
 
-    public struct StatsUpdated has copy, drop {
-        profile_id: ID,
-        owner: address,
-        won: bool,
-        amount: u64,
-    }
-
     // === Init ===
 
     fun init(ctx: &mut TxContext) {
@@ -64,6 +59,14 @@ module onematch::user_profile {
         };
         transfer::share_object(registry);
     }
+
+    #[test_only]
+    public fun init_for_testing(ctx: &mut TxContext) { init(ctx); }
+
+    // expose error codes for tests
+    #[test_only] public fun e_profile_exists(): u64 { EProfileExists }
+    #[test_only] public fun e_username_too_short(): u64 { EUsernameTooShort }
+    #[test_only] public fun e_username_too_long(): u64 { EUsernameTooLong }
 
     // === Public Functions ===
 
@@ -76,6 +79,11 @@ module onematch::user_profile {
     ) {
         let sender = ctx.sender();
         assert!(!table::contains(&registry.profiles, sender), EProfileExists);
+        
+        // Validate username length
+        let len = string::length(&username);
+        assert!(len >= MIN_USERNAME_LEN, EUsernameTooShort);
+        assert!(len <= MAX_USERNAME_LEN, EUsernameTooLong);
 
         let profile = UserProfile {
             id: object::new(ctx),

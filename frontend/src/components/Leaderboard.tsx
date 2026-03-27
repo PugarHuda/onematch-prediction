@@ -1,156 +1,191 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { suiClient, explorerObjectUrl } from "@/lib/onechain";
+import { PACKAGE_ID } from "@/lib/constants";
 
 interface LeaderboardEntry {
   rank: number;
   address: string;
+  username: string;
   wins: number;
   winRate: number;
-  volume: number;
+  totalStaked: number;
   streak: number;
-  badge: string;
+  objectId: string;
 }
-
-// Mock data (in production, fetch from smart contract)
-const MOCK_LEADERS: LeaderboardEntry[] = [
-  { rank: 1, address: "0xace...1337", wins: 247, winRate: 78.5, volume: 12450, streak: 12, badge: "👑" },
-  { rank: 2, address: "0xbob...4242", wins: 198, winRate: 72.3, volume: 9870, streak: 8, badge: "💎" },
-  { rank: 3, address: "0xcat...9999", wins: 156, winRate: 69.1, volume: 7650, streak: 5, badge: "💎" },
-  { rank: 4, address: "0xdog...5555", wins: 134, winRate: 65.8, volume: 6420, streak: 3, badge: "🥇" },
-  { rank: 5, address: "0xelf...7777", wins: 112, winRate: 63.2, volume: 5230, streak: 7, badge: "🥇" },
-];
 
 type TimeFrame = "daily" | "weekly" | "alltime";
 
+// Rank badge based on position
+function rankBadge(rank: number) {
+  if (rank === 1) return { icon: "👑", color: "bg-brutal-yellow text-black" };
+  if (rank === 2) return { icon: "🥈", color: "bg-gray-300 text-black" };
+  if (rank === 3) return { icon: "🥉", color: "bg-orange-300 text-black" };
+  return { icon: `#${rank}`, color: "bg-white text-black" };
+}
+
 export function Leaderboard() {
-  const [timeFrame, setTimeFrame] = useState<TimeFrame>("weekly");
+  const [timeFrame, setTimeFrame] = useState<TimeFrame>("alltime");
+  const [leaders, setLeaders] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    // Fetch ProfileCreated events to get all profiles, then fetch their objects
+    suiClient.queryEvents({
+      query: { MoveEventType: `${PACKAGE_ID}::user_profile::ProfileCreated` },
+      limit: 20,
+      order: "descending",
+    })
+      .then(async (result) => {
+        if (result.data.length === 0) { setLoading(false); return; }
+
+        const profileIds = result.data
+          .map((e) => {
+            const p = e.parsedJson as { profile_id?: string } | undefined;
+            return p?.profile_id;
+          })
+          .filter(Boolean) as string[];
+
+        if (profileIds.length === 0) { setLoading(false); return; }
+
+        const objects = await suiClient.multiGetObjects({
+          ids: profileIds,
+          options: { showContent: true },
+        });
+
+        const parseStr = (v: unknown): string => {
+          if (typeof v === "string") return v;
+          if (v && typeof v === "object" && "bytes" in v) return String((v as { bytes: string }).bytes);
+          return "";
+        };
+
+        const entries: LeaderboardEntry[] = objects
+          .filter((o) => o.data?.content?.dataType === "moveObject")
+          .map((o, i) => {
+            const f = (o.data!.content as { fields: Record<string, unknown> }).fields;
+            const wins = Number(f.wins ?? 0);
+            const totalDuels = Number(f.total_duels ?? 0);
+            return {
+              rank: i + 1,
+              address: String(f.owner ?? "").slice(0, 6) + "…" + String(f.owner ?? "").slice(-4),
+              username: parseStr(f.username) || "anon",
+              wins,
+              winRate: totalDuels > 0 ? Math.round((wins / totalDuels) * 100) : 0,
+              totalStaked: Math.round(Number(f.total_staked ?? 0) / 1e9),
+              streak: Number(f.current_streak ?? 0),
+              objectId: o.data!.objectId,
+            };
+          })
+          // Sort by wins desc
+          .sort((a, b) => b.wins - a.wins)
+          .map((e, i) => ({ ...e, rank: i + 1 }));
+
+        setLeaders(entries);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="border-3 border-black bg-white shadow-brutal hover:shadow-brutal-lg transition-all relative overflow-hidden group">
-      {/* Animated background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-full h-1 bg-brutal-purple animate-shimmer" />
-        <div className="absolute bottom-0 right-0 w-full h-1 bg-brutal-yellow animate-shimmer" style={{ animationDelay: '1.5s' }} />
-      </div>
-      
-      {/* OnePlay Badge */}
-      <div className="absolute top-3 right-3 z-10">
-        <span className="brutal-tag bg-brutal-purple text-white text-[10px] animate-pulse-glow relative overflow-hidden">
-          <span className="relative z-10">ONEPLAY</span>
-          <div className="absolute inset-0 bg-white opacity-0 animate-shimmer" />
-        </span>
-      </div>
+      {/* Animated diagonal stripe background */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{ backgroundImage: "repeating-linear-gradient(45deg, #0A0A0A 0, #0A0A0A 1px, transparent 0, transparent 50%)", backgroundSize: "12px 12px" }} />
 
       {/* Header */}
       <div className="border-b-3 border-black p-4 bg-brutal-yellow relative overflow-hidden">
-        {/* Animated shine */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-        
-        <h3 className="font-mono font-bold text-lg text-black mb-3 relative z-10 flex items-center gap-2">
-          <span className="animate-bounce-subtle inline-block">🏆</span>
-          LEADERBOARD
-        </h3>
-
-        {/* Time Frame Selector */}
+        <div className="flex items-center justify-between relative z-10 mb-3">
+          <h3 className="font-mono font-bold text-lg text-black flex items-center gap-2">
+            <span className="text-2xl">🏆</span>
+            LEADERBOARD
+          </h3>
+          <span className="brutal-tag bg-brutal-purple text-white text-[10px]">LIVE</span>
+        </div>
         <div className="flex gap-1 relative z-10">
-          {(["daily", "weekly", "alltime"] as TimeFrame[]).map((tf, i) => (
+          {(["daily", "weekly", "alltime"] as TimeFrame[]).map((tf) => (
             <button
               key={tf}
               onClick={() => setTimeFrame(tf)}
-              className={`flex-1 py-1 font-mono text-xs font-bold border-2 border-black transition-all hover:scale-105 relative overflow-hidden group/tab ${
-                timeFrame === tf
-                  ? "bg-black text-brutal-yellow shadow-brutal"
-                  : "bg-white text-black hover:bg-brutal-pink"
+              className={`flex-1 py-1 font-mono text-xs font-bold border-2 border-black transition-all hover:scale-105 ${
+                timeFrame === tf ? "bg-black text-brutal-yellow shadow-brutal" : "bg-white text-black hover:bg-brutal-pink"
               }`}
-              style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <span className="relative z-10">{tf.toUpperCase()}</span>
-              {timeFrame === tf && (
-                <div className="absolute inset-0 bg-brutal-yellow opacity-20 animate-pulse" />
-              )}
+              {tf === "alltime" ? "ALL TIME" : tf.toUpperCase()}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Leaderboard List */}
+      {/* List */}
       <div className="divide-y-2 divide-black relative z-10">
-        {MOCK_LEADERS.map((entry, i) => (
-          <div
-            key={entry.address}
-            className={`p-3 hover:bg-brutal-yellow/20 transition-all cursor-pointer group/entry relative overflow-hidden animate-slide-in-left ${
-              i === 0 ? "bg-brutal-yellow/10" : ""
-            }`}
-            style={{ animationDelay: `${i * 0.05}s` }}
-          >
-            {/* Rank change indicator (animated) */}
-            {entry.rank <= 3 && (
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-brutal-green animate-pulse" />
-            )}
-            
-            <div className="flex items-center gap-3">
-              {/* Rank */}
-              <div
-                className={`w-8 h-8 border-2 border-black flex items-center justify-center font-mono font-bold text-sm shadow-brutal group-hover/entry:scale-110 group-hover/entry:rotate-3 transition-all relative overflow-hidden ${
-                  entry.rank === 1
-                    ? "bg-brutal-yellow text-black"
-                    : entry.rank === 2
-                    ? "bg-gray-300 text-black"
-                    : entry.rank === 3
-                    ? "bg-orange-300 text-black"
-                    : "bg-white text-black"
-                }`}
-              >
-                <span className="relative z-10">{entry.rank}</span>
-                {entry.rank === 1 && (
-                  <div className="absolute inset-0 bg-white opacity-0 group-hover/entry:opacity-30 animate-pulse" />
-                )}
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-xs font-bold text-black truncate group-hover/entry:text-brutal-purple transition-colors">
-                    {entry.address}
-                  </span>
-                  <span className="text-sm animate-bounce-subtle inline-block">{entry.badge}</span>
-                </div>
-                <div className="flex items-center gap-3 font-mono text-[10px] text-black/50">
-                  <span className="hover:text-brutal-green transition-colors">🏆 {entry.wins}W</span>
-                  <span className="hover:text-brutal-purple transition-colors">📊 {entry.winRate}%</span>
-                  <span className="hover:text-brutal-yellow transition-colors">💰 {entry.volume} OCT</span>
-                  <span className="text-brutal-orange animate-pulse">🔥 {entry.streak}</span>
-                </div>
-              </div>
-
-              {/* Arrow */}
-              <div className="opacity-0 group-hover/entry:opacity-100 group-hover/entry:translate-x-1 transition-all">
-                <span className="font-mono text-brutal-purple font-bold">→</span>
+        {loading ? (
+          // Skeleton
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="p-3 flex items-center gap-3 animate-pulse">
+              <div className="w-8 h-8 bg-black/10 border-2 border-black" />
+              <div className="flex-1 space-y-1">
+                <div className="h-3 bg-black/10 rounded w-2/3" />
+                <div className="h-2 bg-black/10 rounded w-1/2" />
               </div>
             </div>
+          ))
+        ) : leaders.length === 0 ? (
+          <div className="p-6 text-center">
+            <div className="text-3xl mb-2">🌱</div>
+            <p className="font-mono text-xs text-black/40">No players yet. Be the first!</p>
           </div>
-        ))}
+        ) : (
+          leaders.slice(0, 5).map((entry, i) => {
+            const badge = rankBadge(entry.rank);
+            return (
+              <a
+                key={entry.objectId}
+                href={explorerObjectUrl(entry.objectId)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`flex items-center gap-3 p-3 hover:bg-brutal-yellow/20 transition-all cursor-pointer group/entry relative overflow-hidden animate-slide-in-left ${i === 0 ? "bg-brutal-yellow/10" : ""}`}
+                style={{ animationDelay: `${i * 0.06}s` }}
+              >
+                {entry.rank <= 3 && (
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-brutal-green animate-pulse" />
+                )}
+                {/* Rank badge */}
+                <div className={`w-8 h-8 border-2 border-black flex items-center justify-center font-mono font-bold text-xs shadow-brutal group-hover/entry:scale-110 group-hover/entry:rotate-3 transition-all ${badge.color}`}>
+                  {entry.rank <= 3 ? badge.icon : entry.rank}
+                </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1 mb-0.5">
+                    <span className="font-mono text-xs font-bold text-black truncate group-hover/entry:text-brutal-purple transition-colors">
+                      @{entry.username}
+                    </span>
+                    {entry.streak >= 3 && (
+                      <span className="text-xs animate-pulse">🔥</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 font-mono text-[10px] text-black/50">
+                    <span className="text-brutal-green font-bold">{entry.wins}W</span>
+                    <span>{entry.winRate}% WR</span>
+                    <span>{entry.totalStaked} OCT</span>
+                  </div>
+                </div>
+                <span className="font-mono text-brutal-purple font-bold opacity-0 group-hover/entry:opacity-100 group-hover/entry:translate-x-1 transition-all text-xs">↗</span>
+              </a>
+            );
+          })
+        )}
       </div>
 
       {/* Footer */}
       <div className="border-t-3 border-black p-3 bg-brutal-purple text-center relative overflow-hidden group/footer">
-        {/* Animated background */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/footer:translate-x-full transition-transform duration-1000" />
-        
-        <p className="font-mono text-xs text-white/80 mb-2 relative z-10">
-          Your Rank: <span className="font-bold text-brutal-yellow animate-pulse-scale inline-block">#42</span>
-          <span className="ml-1 text-brutal-green text-[10px] animate-bounce-subtle inline-block">↑ +3</span>
+        <p className="font-mono text-[10px] text-white/60 relative z-10">
+          Powered by OneChain · {leaders.length} players ranked
         </p>
-        <button className="btn-brutal bg-brutal-yellow text-black w-full py-2 text-xs hover:scale-105 active:scale-95 relative overflow-hidden group/btn z-10">
-          <span className="relative z-10">VIEW FULL RANKINGS →</span>
-          <div className="absolute inset-0 bg-black opacity-0 group-hover/btn:opacity-10 transition-opacity" />
-        </button>
       </div>
-
-      <p className="font-mono text-[10px] text-black/30 text-center py-2 relative z-10 animate-fade-in-up">
-        Powered by OnePlay · Live Rankings
-      </p>
     </div>
   );
 }
