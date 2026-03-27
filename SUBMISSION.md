@@ -9,7 +9,6 @@ OneMatch — P2P Prediction Duels
 - **Email**: hudapugar@gmail.com
 
 ## Links
-- **Live MVP**: https://onematch-onechain.vercel.app/feed
 - **GitHub**: https://github.com/PugarHuda/onematch-prediction
 - **Explorer**: https://onescan.cc/testnet
 - **Package ID**: `0xcf72b6d537ebef117b1b743fd06779a9a1e97ffcbbc24e288561799aed1bca39`
@@ -30,7 +29,6 @@ OneMatch is a P2P prediction market with a Tinder-like swipe UX built on OneChai
 
 ## Working MVP
 
-### Live at: https://onematch-onechain.vercel.app/
 
 **Core Features (all working):**
 1. **Swipe Feed** — Browse prediction events, swipe to bet (right=YES, left=NO, up=3× stake)
@@ -136,7 +134,7 @@ OneMatch is a P2P prediction market with a Tinder-like swipe UX built on OneChai
 ---
 
 ## Video Demo
-[TO BE ADDED — YouTube link or .mp4 file, max 3 minutes]
+https://drive.google.com/file/d/1m8OnEU5Oo87ntV5dnG21NlhLt45ItazA/view?usp=sharing
 
 ---
 
