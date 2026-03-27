@@ -1,6 +1,15 @@
 import { create } from "zustand";
 import type { UserProfile, PredictionEvent } from "./types";
 
+interface BetRecord {
+  eventId: string;
+  question: string;
+  position: boolean;
+  stakeOCT: number;
+  timestamp: number;
+  txDigest: string;
+}
+
 interface AppStore {
   // Profile
   profile: UserProfile | null;
@@ -18,6 +27,10 @@ interface AppStore {
   // Swipe history
   swipedIds: Set<string>;
   addSwiped: (id: string) => void;
+
+  // Bet history (syncs to duels page)
+  bets: BetRecord[];
+  addBet: (bet: BetRecord) => void;
   
   // Toast notifications
   toasts: Array<{ id: string; message: string; type: "success" | "error" | "info" }>;
@@ -39,6 +52,10 @@ export const useAppStore = create<AppStore>((set) => ({
   swipedIds: new Set(),
   addSwiped: (id) =>
     set((s) => ({ swipedIds: new Set([...s.swipedIds, id]) })),
+
+  bets: [],
+  addBet: (bet) =>
+    set((s) => ({ bets: [...s.bets, bet] })),
   
   toasts: [],
   addToast: (message, type = "info") =>

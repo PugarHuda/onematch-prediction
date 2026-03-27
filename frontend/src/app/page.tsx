@@ -179,6 +179,44 @@ export default function HomePage() {
           ))}
         </div>
 
+        {/* ── Documentation / Tech Stack ── */}
+        <div className="border-3 border-black bg-white shadow-brutal-xl animate-fade-in-up" style={{ animationDelay: '0.45s' }}>
+          <div className="border-b-3 border-black p-4 bg-black">
+            <h2 className="font-mono font-bold text-xl text-brutal-yellow flex items-center gap-2">
+              📋 TECH STACK & INTEGRATION
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x-0 md:divide-x-3 divide-y-3 md:divide-y-0 divide-black">
+            {[
+              { title: "SMART CONTRACTS", items: ["3 Move modules", "14 unit tests", "P2P escrow", "Treasury config"], color: "#FFE500" },
+              { title: "ONECHAIN PRODUCTS", items: ["OneWallet", "OneDEX swap", "OnePlay ranks", "OneID profiles"], color: "#FF3CAC" },
+              { title: "AI & GAMEFI", items: ["NLP sentiment", "AI matchmaking", "ELO rating", "XP/Level system"], color: "#4DFFFF" },
+              { title: "FRONTEND", items: ["Next.js 15", "Framer Motion", "Zustand state", "GNews API"], color: "#00FF87" },
+            ].map((col) => (
+              <div key={col.title} className="p-4">
+                <p className="font-mono text-xs font-bold uppercase mb-2" style={{ color: col.color }}>{col.title}</p>
+                <ul className="space-y-1">
+                  {col.items.map((item) => (
+                    <li key={item} className="font-mono text-xs text-black/60 flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-black/30 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="border-t-3 border-black p-3 bg-brutal-bg flex flex-wrap items-center justify-center gap-3">
+            <a href="https://github.com/PugarHuda/onematch-prediction" target="_blank" rel="noopener noreferrer"
+              className="brutal-tag bg-black text-white hover:bg-brutal-purple transition-colors">GITHUB ↗</a>
+            <a href="https://onescan.cc/testnet" target="_blank" rel="noopener noreferrer"
+              className="brutal-tag bg-black text-white hover:bg-brutal-purple transition-colors">ONESCAN ↗</a>
+            <a href="https://docs.onelabs.cc" target="_blank" rel="noopener noreferrer"
+              className="brutal-tag bg-black text-white hover:bg-brutal-purple transition-colors">ONECHAIN DOCS ↗</a>
+            <span className="brutal-tag bg-brutal-yellow text-black">PACKAGE: 0xcf72...ca39</span>
+          </div>
+        </div>
+
         {/* ── OneChain badge ── */}
         <div className="border-3 border-black bg-brutal-purple shadow-brutal p-5 flex flex-col sm:flex-row items-center justify-between gap-4 hover:shadow-brutal-xl transition-all relative overflow-hidden group animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
           {/* Animated gradient background */}

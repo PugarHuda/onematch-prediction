@@ -20,7 +20,7 @@ export function TokenSwapWidget() {
   const addToast = useAppStore((s) => s.addToast);
   const [fromIdx, setFromIdx] = useState(0);
   const [toIdx, setToIdx] = useState(1);
-  const [amount, setAmount] = useState(10);
+  const [amount, setAmount] = useState(0.1);
   const [slippage] = useState(0.5);
 
   const from = TOKENS[fromIdx];

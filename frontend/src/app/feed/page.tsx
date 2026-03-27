@@ -34,6 +34,7 @@ export default function FeedPage() {
   const toasts      = useAppStore((s) => s.toasts);
   const addToast    = useAppStore((s) => s.addToast);
   const removeToast = useAppStore((s) => s.removeToast);
+  const addBet      = useAppStore((s) => s.addBet);
 
   const [lastAction, setLastAction] = useState<{ dir: SwipeDir; question: string } | null>(null);
   const [txPending, setTxPending]   = useState(false);
@@ -69,9 +70,17 @@ export default function FeedPage() {
           transaction: tx,
         },
         {
-          onSuccess: () => {
+          onSuccess: (result) => {
             setTxPending(false);
-            addToast("Transaction successful!", "success");
+            addToast("Bet placed on-chain!", "success");
+            addBet({
+              eventId: event.id,
+              question: event.question,
+              position,
+              stakeOCT: finalStake,
+              timestamp: Date.now(),
+              txDigest: (result as { digest?: string }).digest ?? "",
+            });
             setTimeout(() => {
               showMatch({
                 playerYes: account.address,
