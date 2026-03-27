@@ -47,10 +47,10 @@ export interface SwipeAction {
   position: boolean | null; // true=YES, false=NO, null=skip
 }
 
-// Mock events for demo (replace with on-chain queries)
+// Events deployed on OneChain Testnet
 export const MOCK_EVENTS: PredictionEvent[] = [
   {
-    id: "0x001",
+    id: "0xa601d9cf67b276ce9a4602adf10acdcef637e991f29ab8502af8005bf2a9be99",
     question: "Will BTC hit $120,000 before May 2026?",
     category: "crypto",
     endTime: Date.now() + 1000 * 60 * 60 * 24 * 7,
@@ -63,20 +63,7 @@ export const MOCK_EVENTS: PredictionEvent[] = [
       "Bitcoin has been trading between $90k–$105k in Q1 2026. Analysts are split — bulls cite ETF inflows and halving cycle, bears point to macro headwinds and profit-taking.",
   },
   {
-    id: "0x002",
-    question: "Will ETH flip BTC in market cap by end of 2026?",
-    category: "crypto",
-    endTime: Date.now() + 1000 * 60 * 60 * 24 * 30,
-    creator: "0xdef",
-    status: "open",
-    yesCount: 67,
-    noCount: 201,
-    newsKeywords: "Ethereum ETH flippening market cap",
-    context:
-      "ETH/BTC ratio sits at ~0.035 as of March 2026. The 'flippening' has been predicted many times but BTC dominance remains above 50%. Ethereum's Pectra upgrade is expected mid-2026.",
-  },
-  {
-    id: "0x003",
+    id: "0xf943ca570297d7d91120394c0001d2f415b56dd70ceee1c25db3373f924f5fbb",
     question: "Will OneChain reach 1M daily active users in 2026?",
     category: "tech",
     endTime: Date.now() + 1000 * 60 * 60 * 24 * 60,
@@ -89,7 +76,7 @@ export const MOCK_EVENTS: PredictionEvent[] = [
       "OneChain launched its mainnet in late 2025 and has been growing rapidly. Current DAU is estimated at ~120k. The OneHack 3.0 hackathon is expected to bring a wave of new dApps and users.",
   },
   {
-    id: "0x004",
+    id: "0xec6bd58afa70bb1a9a66d5b5d2fef9c7da7ad4ccb7fa96a69c2dd63acda7d7f7",
     question: "Will AI replace 30% of software dev jobs by 2027?",
     category: "tech",
     endTime: Date.now() + 1000 * 60 * 60 * 24 * 90,
@@ -102,7 +89,7 @@ export const MOCK_EVENTS: PredictionEvent[] = [
       "GitHub Copilot, Cursor, and Claude Code are already handling significant portions of routine coding tasks. A Goldman Sachs report estimates 20–30% of coding tasks could be automated by 2027, though full job replacement remains debated.",
   },
   {
-    id: "0x005",
+    id: "0x3bbb2b4de289bd462c1a4393ec581c61d2763ef161d22ae19952b30d39615671",
     question: "Will a Move-based chain be top 5 by TVL in 2026?",
     category: "crypto",
     endTime: Date.now() + 1000 * 60 * 60 * 24 * 45,
@@ -115,7 +102,7 @@ export const MOCK_EVENTS: PredictionEvent[] = [
       "Sui and Aptos have been climbing the TVL rankings throughout 2025. Sui crossed $2B TVL in early 2026. OneChain, also Move-based, is gaining traction. The question is whether any of them can crack the top 5 alongside Ethereum, Solana, and BNB Chain.",
   },
   {
-    id: "0x006",
+    id: "0x2bb75d7ebac435d8f5e1900772ee5aeabde88bf9adface53cacf1a9c62bf50ad",
     question: "Will the US approve a spot ETH ETF with staking by end of 2026?",
     category: "politics",
     endTime: Date.now() + 1000 * 60 * 60 * 24 * 120,
