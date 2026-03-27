@@ -47,8 +47,9 @@ export default function FeedPage() {
   // Fetch events from chain on mount + poll every 15s
   useEffect(() => {
     let mounted = true;
-    const load = () => {
-      fetchAllEvents().then((events) => {
+    const load = async () => {
+      try {
+        const events = await fetchAllEvents();
         if (!mounted) return;
         if (events.length > 0) {
           const mapped: PredictionEvent[] = events.map((e) => ({
@@ -57,19 +58,25 @@ export default function FeedPage() {
             category: e.category || "crypto",
             endTime: e.endTime,
             creator: e.creator,
-            status: "open",
+            status: "open" as const,
             yesCount: e.yesCount,
             noCount: e.noCount,
             newsKeywords: e.question.split(" ").slice(0, 4).join(" "),
             context: `On-chain prediction event. ${e.yesCount + e.noCount} total votes so far.`,
           }));
           setChainEvents(mapped);
+        } else {
+          // Chain fetch returned empty — use MOCK_EVENTS (already have real IDs)
+          setChainEvents([]);
         }
-        setLoadingEvents(false);
-      }).catch(() => setLoadingEvents(false));
+      } catch {
+        // Silently fallback to MOCK_EVENTS
+      } finally {
+        if (mounted) setLoadingEvents(false);
+      }
     };
     load();
-    const interval = setInterval(load, 15000); // Poll every 15s
+    const interval = setInterval(load, 15000);
     return () => { mounted = false; clearInterval(interval); };
   }, []);
 

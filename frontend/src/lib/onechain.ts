@@ -162,7 +162,7 @@ export async function getOnChainEvents() {
   return events.data;
 }
 
-/** Fetch all PredictionEvent objects from EventRegistry */
+/** Fetch all PredictionEvent objects — direct fetch by known IDs + registry scan */
 export async function fetchAllEvents(): Promise<Array<{
   id: string;
   question: string;
@@ -174,43 +174,45 @@ export async function fetchAllEvents(): Promise<Array<{
   noCount: number;
 }>> {
   try {
-    // Get EventRegistry to find event_count
-    const registry = await suiClient.getObject({
-      id: EVENT_REGISTRY_ID,
-      options: { showContent: true },
-    });
-    const regFields = (registry.data?.content as { fields: Record<string, unknown> } | undefined)?.fields;
-    const eventCount = Number(regFields?.event_count ?? 0);
-    if (eventCount === 0) return [];
+    // Known on-chain event IDs (deployed on testnet)
+    const KNOWN_EVENT_IDS = [
+      "0xa601d9cf67b276ce9a4602adf10acdcef637e991f29ab8502af8005bf2a9be99",
+      "0xec6bd58afa70bb1a9a66d5b5d2fef9c7da7ad4ccb7fa96a69c2dd63acda7d7f7",
+      "0xf943ca570297d7d91120394c0001d2f415b56dd70ceee1c25db3373f924f5fbb",
+      "0x3bbb2b4de289bd462c1a4393ec581c61d2763ef161d22ae19952b30d39615671",
+      "0x2bb75d7ebac435d8f5e1900772ee5aeabde88bf9adface53cacf1a9c62bf50ad",
+    ];
 
-    // Query all objects of type PredictionEvent owned by the package
-    // Use queryTransactionBlocks to find created PredictionEvent objects
-    const txs = await suiClient.queryTransactionBlocks({
-      filter: { InputObject: EVENT_REGISTRY_ID },
-      limit: 50,
-      order: "descending",
-      options: { showObjectChanges: true },
-    });
-
-    // Collect PredictionEvent object IDs from tx results
-    const eventIds = new Set<string>();
-    for (const tx of txs.data) {
-      for (const change of tx.objectChanges ?? []) {
-        if (
-          "objectType" in change &&
-          typeof change.objectType === "string" &&
-          change.objectType.includes("::prediction_event::PredictionEvent") &&
-          "objectId" in change
-        ) {
-          eventIds.add(change.objectId);
+    // Also try to find new events via registry transactions
+    let extraIds: string[] = [];
+    try {
+      const txs = await suiClient.queryTransactionBlocks({
+        filter: { InputObject: EVENT_REGISTRY_ID },
+        limit: 20,
+        order: "descending",
+        options: { showObjectChanges: true },
+      });
+      for (const tx of txs.data) {
+        for (const change of tx.objectChanges ?? []) {
+          if (
+            "objectType" in change &&
+            typeof change.objectType === "string" &&
+            change.objectType.includes("::prediction_event::PredictionEvent") &&
+            "objectId" in change &&
+            !KNOWN_EVENT_IDS.includes(change.objectId)
+          ) {
+            extraIds.push(change.objectId);
+          }
         }
       }
+    } catch {
+      // Registry scan failed, use known IDs only
     }
 
-    if (eventIds.size === 0) return [];
+    const allIds = [...new Set([...KNOWN_EVENT_IDS, ...extraIds])];
 
     const objects = await suiClient.multiGetObjects({
-      ids: Array.from(eventIds),
+      ids: allIds,
       options: { showContent: true },
     });
 
@@ -235,7 +237,7 @@ export async function fetchAllEvents(): Promise<Array<{
           noCount: Number(f.no_count ?? 0),
         };
       })
-      .filter((e) => e.status === 0); // Only open events
+      .filter((e) => e.status === 0 && e.endTime > Date.now()); // Only open + not expired
   } catch {
     return [];
   }
