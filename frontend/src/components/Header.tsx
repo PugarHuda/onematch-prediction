@@ -6,13 +6,14 @@ import { suiClient, formatOCT } from "@/lib/onechain";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import { Layers, Swords, User, Settings, Coins, Menu, X } from "lucide-react";
+import { Layers, Swords, User, Settings, Coins, Menu, X, BookOpen } from "lucide-react";
+import { PACKAGE_ID } from "@/lib/constants";
 
-const NAV = [
+const NAV_USER = [
   { href: "/feed",    label: "FEED",    Icon: Layers },
   { href: "/duels",   label: "DUELS",   Icon: Swords },
   { href: "/profile", label: "PROFILE", Icon: User },
-  { href: "/admin",   label: "ADMIN",   Icon: Settings },
+  { href: "/docs",    label: "DOCS",    Icon: BookOpen },
 ];
 
 export function Header() {
@@ -22,6 +23,17 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [prevBalance, setPrevBalance] = useState<bigint>(0n);
   const [balanceChanged, setBalanceChanged] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Check if connected wallet owns AdminCap
+  useEffect(() => {
+    if (!account) { setIsAdmin(false); return; }
+    suiClient.getOwnedObjects({
+      owner: account.address,
+      filter: { StructType: `${PACKAGE_ID}::prediction_event::AdminCap` },
+    }).then((r) => setIsAdmin(r.data.length > 0))
+      .catch(() => setIsAdmin(false));
+  }, [account]);
 
   useEffect(() => {
     if (!account) return;
@@ -46,7 +58,10 @@ export function Header() {
     setPrevBalance(balance);
   }, [balance, prevBalance]);
 
-  const visibleNav = NAV.filter(n => n.href !== "/admin" || !!account);
+  const visibleNav = [
+    ...NAV_USER,
+    ...(isAdmin ? [{ href: "/admin", label: "ADMIN", Icon: Settings }] : []),
+  ];
 
   return (
     <header className="border-b-3 border-black bg-brutal-yellow sticky top-0 z-50 shadow-brutal transition-all relative overflow-hidden">

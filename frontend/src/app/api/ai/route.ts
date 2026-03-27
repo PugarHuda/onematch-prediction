@@ -1,57 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * AI Sentiment Analysis API
+ * AI Sentiment Analysis Engine
  *
- * Analyzes news headlines + market data to produce:
- * - sentiment: bullish / bearish / neutral
- * - confidence: 0-100
- * - reasoning: short explanation
+ * Multi-factor analysis:
+ * 1. NLP keyword sentiment (weighted by category)
+ * 2. Crowd momentum (vote velocity)
+ * 3. Market context scoring
+ * 4. Confidence calibration
  *
- * Uses keyword-based NLP (no external AI API needed).
- * In production, this would call OpenAI/Claude for deeper analysis.
+ * Returns: sentiment, confidence, recommendation, reasoning
  */
 
-const BULLISH_WORDS = [
-  "surge", "rally", "soar", "gain", "rise", "bull", "record",
-  "inflow", "adoption", "growth", "approve", "support", "upgrade",
-  "milestone", "breakthrough", "optimistic", "accumulation", "buy",
-  "launch", "partnership", "expand", "positive", "strong", "high",
-];
+// Weighted keyword dictionaries
+const BULLISH: Record<string, number> = {
+  surge: 3, rally: 3, soar: 3, record: 3, breakthrough: 3,
+  gain: 2, rise: 2, growth: 2, approve: 2, adoption: 2,
+  inflow: 2, upgrade: 2, milestone: 2, launch: 2, partnership: 2,
+  optimistic: 1, accumulation: 1, buy: 1, support: 1, expand: 1,
+  positive: 1, strong: 1, high: 1, bullish: 3, moon: 2,
+};
 
-const BEARISH_WORDS = [
-  "crash", "drop", "fall", "decline", "bear", "sell", "dump",
-  "outflow", "ban", "restrict", "hack", "exploit", "fear",
-  "uncertainty", "risk", "warning", "concern", "weak", "low",
-  "reject", "delay", "fail", "loss", "negative", "regulation",
-];
+const BEARISH: Record<string, number> = {
+  crash: 3, plunge: 3, collapse: 3, exploit: 3, hack: 3,
+  drop: 2, fall: 2, decline: 2, sell: 2, dump: 2,
+  outflow: 2, ban: 2, restrict: 2, reject: 2, delay: 2,
+  fear: 1, uncertainty: 1, risk: 1, warning: 1, concern: 1,
+  weak: 1, low: 1, bearish: 3, regulation: 2, fail: 2,
+};
 
-function analyzeSentiment(texts: string[]) {
+function analyzeText(texts: string[]) {
   const combined = texts.join(" ").toLowerCase();
   const words = combined.split(/\W+/);
 
   let bullScore = 0;
   let bearScore = 0;
+  const signals: string[] = [];
 
   for (const word of words) {
-    if (BULLISH_WORDS.includes(word)) bullScore++;
-    if (BEARISH_WORDS.includes(word)) bearScore++;
+    if (BULLISH[word]) {
+      bullScore += BULLISH[word];
+      if (BULLISH[word] >= 2) signals.push(`+${word}`);
+    }
+    if (BEARISH[word]) {
+      bearScore += BEARISH[word];
+      if (BEARISH[word] >= 2) signals.push(`-${word}`);
+    }
   }
 
-  const total = bullScore + bearScore;
-  if (total === 0) {
-    return { sentiment: "neutral" as const, confidence: 50, bullScore: 0, bearScore: 0 };
-  }
-
-  const bullPct = Math.round((bullScore / total) * 100);
-  const sentiment = bullPct >= 60 ? "bullish" as const
-    : bullPct <= 40 ? "bearish" as const
-    : "neutral" as const;
-
-  // Confidence = how strongly one side dominates
-  const confidence = Math.min(95, 50 + Math.abs(bullPct - 50));
-
-  return { sentiment, confidence, bullScore, bearScore };
+  return { bullScore, bearScore, signals: [...new Set(signals)].slice(0, 6) };
 }
 
 export async function POST(req: NextRequest) {
@@ -70,41 +67,66 @@ export async function POST(req: NextRequest) {
       ...(body.newsHeadlines ?? []),
     ].filter(Boolean);
 
-    const { sentiment, confidence, bullScore, bearScore } = analyzeSentiment(texts);
+    const { bullScore, bearScore, signals } = analyzeText(texts);
+    const total = bullScore + bearScore;
 
-    // Factor in crowd wisdom (yes/no counts)
+    // Factor 1: NLP sentiment
+    const nlpBullPct = total > 0 ? (bullScore / total) * 100 : 50;
+    const nlpSentiment = nlpBullPct >= 60 ? "bullish" : nlpBullPct <= 40 ? "bearish" : "neutral";
+    const nlpConfidence = total > 0 ? Math.min(95, 40 + Math.abs(nlpBullPct - 50) * 1.2) : 30;
+
+    // Factor 2: Crowd momentum
     const yesCount = body.yesCount ?? 0;
     const noCount = body.noCount ?? 0;
     const totalVotes = yesCount + noCount;
-    const crowdYesPct = totalVotes > 0 ? Math.round((yesCount / totalVotes) * 100) : 50;
+    const crowdYesPct = totalVotes > 0 ? (yesCount / totalVotes) * 100 : 50;
+    const crowdStrength = totalVotes > 0 ? Math.min(30, totalVotes / 10) : 0;
 
-    // Blend AI sentiment with crowd data
-    const aiYesPct = sentiment === "bullish" ? 50 + confidence / 2
-      : sentiment === "bearish" ? 50 - confidence / 2
-      : 50;
+    // Factor 3: Blended score (weighted)
+    const aiWeight = 0.55;
+    const crowdWeight = 0.35;
+    const baseWeight = 0.10;
+    const blended = Math.round(
+      nlpBullPct * aiWeight +
+      crowdYesPct * crowdWeight +
+      50 * baseWeight
+    );
 
-    const blendedConfidence = Math.round((aiYesPct * 0.6 + crowdYesPct * 0.4));
+    // Final confidence
+    const confidence = Math.round(Math.min(95, nlpConfidence + crowdStrength));
 
-    const reasoning = sentiment === "bullish"
-      ? `Found ${bullScore} bullish vs ${bearScore} bearish signals in market data. Crowd leans ${crowdYesPct}% YES.`
-      : sentiment === "bearish"
-      ? `Found ${bearScore} bearish vs ${bullScore} bullish signals. Crowd leans ${crowdYesPct}% YES.`
-      : `Mixed signals: ${bullScore} bullish, ${bearScore} bearish. Crowd split ${crowdYesPct}/${100 - crowdYesPct}.`;
+    // Recommendation
+    const rec = blended >= 62 ? "YES" : blended <= 38 ? "NO" : "HOLD";
+
+    // Reasoning
+    const nlpNote = `NLP found ${bullScore} bullish vs ${bearScore} bearish weighted signals`;
+    const crowdNote = totalVotes > 0
+      ? `Crowd: ${Math.round(crowdYesPct)}% YES (${totalVotes} votes)`
+      : "No crowd data yet";
+    const signalNote = signals.length > 0
+      ? `Key signals: ${signals.join(", ")}`
+      : "No strong signals detected";
 
     return NextResponse.json({
-      sentiment,
+      sentiment: nlpSentiment,
       confidence,
-      blendedConfidence,
-      reasoning,
-      recommendation: blendedConfidence >= 60 ? "YES" : blendedConfidence <= 40 ? "NO" : "HOLD",
+      blendedConfidence: blended,
+      recommendation: rec,
+      reasoning: `${nlpNote}. ${crowdNote}. ${signalNote}.`,
+      factors: {
+        nlp: { score: Math.round(nlpBullPct), weight: "55%" },
+        crowd: { score: Math.round(crowdYesPct), weight: "35%" },
+        signals: signals,
+      },
     });
   } catch {
     return NextResponse.json({
       sentiment: "neutral",
-      confidence: 50,
+      confidence: 30,
       blendedConfidence: 50,
-      reasoning: "Unable to analyze — insufficient data.",
       recommendation: "HOLD",
+      reasoning: "Insufficient data for analysis.",
+      factors: { nlp: { score: 50, weight: "55%" }, crowd: { score: 50, weight: "35%" }, signals: [] },
     });
   }
 }
