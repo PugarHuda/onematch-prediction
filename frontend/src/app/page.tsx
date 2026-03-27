@@ -97,40 +97,26 @@ export default function HomePage() {
         </div>
 
         {/* ── How it works ── */}
-        <div className="mb-6 text-center animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <h2 className="font-mono font-bold text-3xl text-black mb-2 relative inline-block group">
-            HOW IT WORKS
-            <div className="absolute -bottom-1 left-0 w-full h-1 bg-brutal-pink group-hover:h-2 transition-all" />
-          </h2>
-          <p className="font-mono text-sm text-black/50">Three simple steps to start dueling</p>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {STEPS.map((s, i) => (
-            <div
-              key={s.n}
-              className="border-3 border-black shadow-brutal p-5 hover:shadow-brutal-xl hover:-translate-y-2 transition-all cursor-pointer group relative overflow-hidden animate-fade-in-up card-3d"
-              style={{ 
-                backgroundColor: s.bg,
-                animationDelay: `${i * 0.15}s`
-              }}
-            >
-              {/* Spotlight effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Icon badge */}
-              <div className={`absolute top-3 right-3 text-3xl opacity-20 group-hover:opacity-60 group-hover:scale-125 transition-all ${s.iconAnim}`}>
-                {s.icon}
+        <div className="border-3 border-black bg-white shadow-brutal-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="border-b-3 border-black p-3 bg-black flex items-center justify-between">
+            <h2 className="font-mono font-bold text-lg text-brutal-yellow">HOW IT WORKS</h2>
+            <span className="font-mono text-xs text-white/40">3 steps to start dueling</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y-3 md:divide-y-0 md:divide-x-3 divide-black">
+            {STEPS.map((s) => (
+              <div key={s.n} className="p-4 hover:bg-brutal-yellow/10 transition-colors group relative overflow-hidden" style={{ backgroundColor: s.bg + "20" }}>
+                <div className="flex items-start gap-3">
+                  <div className="border-2 border-black w-10 h-10 flex items-center justify-center font-mono font-bold text-lg shadow-brutal flex-shrink-0" style={{ backgroundColor: s.bg }}>
+                    {s.n}
+                  </div>
+                  <div>
+                    <p className="font-mono font-bold text-sm text-black mb-1">{s.title}</p>
+                    <p className="font-mono text-xs text-black/60 leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
               </div>
-              
-              <p className="font-mono font-bold text-5xl text-black/15 mb-1 group-hover:text-black/30 transition-colors group-hover:scale-110 inline-block duration-300 relative z-10">{s.n}</p>
-              <h3 className="font-mono font-bold text-2xl text-black mb-2 group-hover:scale-105 transition-transform inline-block relative z-10">{s.title}</h3>
-              <p className="text-black/70 text-sm leading-relaxed relative z-10">{s.desc}</p>
-              
-              {/* Bottom accent line */}
-              <div className="absolute bottom-0 left-0 h-1 w-0 bg-black group-hover:w-full transition-all duration-500" />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* ── Stats ── */}
