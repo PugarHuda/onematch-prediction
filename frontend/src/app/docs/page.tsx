@@ -3,6 +3,30 @@ import { BookOpen, Code, Brain, Gamepad2, Wallet, ArrowDownUp, Trophy, Shield } 
 
 const SECTIONS = [
   {
+    title: "GAME MECHANICS",
+    Icon: Gamepad2,
+    color: "#FF3CAC",
+    items: [
+      { label: "1. Swipe to Predict", desc: "Browse events one card at a time. Swipe right=YES, left=NO, up=YES×3 stake, down=Skip. Tap for details + AI analysis." },
+      { label: "2. AI Analyzes", desc: "NLP engine reads news headlines, calculates weighted sentiment (55% AI + 35% crowd + 10% base), gives YES/NO/HOLD recommendation." },
+      { label: "3. Bet & Lock", desc: "OCT tokens locked in Move smart contract escrow. Min 0.1 OCT, max 10K OCT. PendingBet sent to matchmaker." },
+      { label: "4. AI Matchmaking", desc: "ELO-based matchmaker finds opponent with opposite position and equal stake. Creates MatchedDuel shared object." },
+      { label: "5. Settle & Win", desc: "After deadline, admin settles event. Smart contract pays winner 95% of pot. 5% fee to treasury. Reputation updated on-chain." },
+      { label: "6. Level Up", desc: "Win: +10 rep, streak+1. Lose: +2 rep, streak reset. Every 5-win streak: +5 bonus. LV.1 Rookie → LV.10 Legend." },
+    ],
+  },
+  {
+    title: "ECONOMY",
+    Icon: ArrowDownUp,
+    color: "#4DFFFF",
+    items: [
+      { label: "Betting", desc: "Min 0.1 OCT, max 10,000 OCT per bet. Equal stakes required for fair duels." },
+      { label: "Payout", desc: "Winner takes 95% of total pot. 5% platform fee sent to TreasuryConfig address." },
+      { label: "Bet Expiry", desc: "Unmatched bets auto-expire after 24 hours. Player or anyone can cancel expired bets for full refund." },
+      { label: "OneDEX Swap", desc: "Swap OCT/USDC/WETH/WBTC with 0.3% fee and slippage tolerance. Transaction built on-chain." },
+    ],
+  },
+  {
     title: "SMART CONTRACTS",
     Icon: Code,
     color: "#FFE500",

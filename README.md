@@ -146,11 +146,37 @@ curl -X POST https://faucet-testnet.onelabs.cc/v1/gas \
 
 ## How It Works
 
-1. **Swipe** → Browse events. Right=YES, Left=NO, Up=3×stake, Down=Skip
-2. **AI Analysis** → NLP sentiment + crowd wisdom = recommendation
-3. **Match** → AI matchmaker finds opponent. Funds locked in escrow
-4. **Settle** → Admin settles after deadline. Smart contract pays winner 95%
-5. **Reputation** → Win/loss recorded on-chain. Level up, earn badges
+### Game Flow
+1. **Swipe** → Browse prediction events. Right=YES, Left=NO, Up=3×stake, Down=Skip
+2. **AI Analysis** → NLP reads news headlines. Weighted sentiment: 55% AI + 35% crowd + 10% base. Get YES/NO/HOLD recommendation with confidence %
+3. **Bet** → OCT locked in Move smart contract escrow. Min 0.1 OCT, max 10K OCT
+4. **Match** → AI matchmaker (ELO-based) finds opponent with opposite position and equal stake. Creates MatchedDuel shared object
+5. **Settle** → After deadline, admin settles event on-chain. Smart contract pays winner 95% of pot
+6. **Level Up** → Win: +10 rep, streak+1. Lose: +2 rep, streak reset. Every 5-win streak: +5 bonus
+
+### Economy
+- Min bet: 0.1 OCT · Max: 10,000 OCT
+- Winner takes 95% of total pot
+- 5% platform fee → TreasuryConfig (deployer wallet)
+- Unmatched bets auto-expire after 24 hours (full refund)
+- OneDEX swap: OCT/USDC/WETH/WBTC with 0.3% fee
+
+### Progression System
+| Level | Title | Reputation Required |
+|-------|-------|-------------------|
+| 1 | ROOKIE | 0-149 |
+| 2 | DUELIST | 150-199 |
+| 3 | VETERAN | 200-299 |
+| 5 | EXPERT | 300-499 |
+| 7 | MASTER | 500-999 |
+| 10 | LEGEND | 1000+ |
+
+### Badges (Dynamic, from on-chain stats)
+- 🔥 Hot Streak — 3+ win streak
+- ⚡ Fast Matcher — 10+ total duels
+- 🎯 Sharp Caller — 60%+ win rate
+- 💎 Diamond Hands — 100+ OCT staked
+- 🌱 Newcomer — 0 duels (new player)
 
 ## Architecture
 

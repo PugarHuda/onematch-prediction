@@ -179,6 +179,73 @@ export default function HomePage() {
           ))}
         </div>
 
+        {/* ── Game Mechanics ── */}
+        <div className="border-3 border-black bg-white shadow-brutal-xl animate-fade-in-up" style={{ animationDelay: '0.42s' }}>
+          <div className="border-b-3 border-black p-4 bg-brutal-pink">
+            <h2 className="font-mono font-bold text-xl text-black">🎮 HOW THE GAME WORKS</h2>
+          </div>
+          <div className="p-5 space-y-4">
+            {/* Flow */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+              {[
+                { step: "1", title: "SWIPE", desc: "Browse prediction events. Swipe right=YES, left=NO, up=3× stake", bg: "#FFE500" },
+                { step: "2", title: "AI ANALYZE", desc: "NLP reads news headlines. Get YES/NO/HOLD recommendation with confidence %", bg: "#BF5FFF" },
+                { step: "3", title: "BET", desc: "OCT locked in smart contract escrow. Min 0.1 OCT, max 10K OCT", bg: "#4DFFFF" },
+                { step: "4", title: "MATCH", desc: "AI matchmaker finds opponent with opposite position. Equal stakes required", bg: "#FF3CAC" },
+                { step: "5", title: "WIN", desc: "Event settles on-chain. Winner gets 95% of pot. Reputation + XP earned", bg: "#00FF87" },
+              ].map((s) => (
+                <div key={s.step} className="border-2 border-black p-3 text-center" style={{ backgroundColor: s.bg }}>
+                  <p className="font-mono font-bold text-3xl text-black/20">{s.step}</p>
+                  <p className="font-mono font-bold text-sm text-black">{s.title}</p>
+                  <p className="font-mono text-[10px] text-black/60 mt-1 leading-relaxed">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Economy + GameFi */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="border-2 border-black bg-brutal-bg p-3">
+                <p className="font-mono text-xs font-bold text-black mb-2">💰 ECONOMY</p>
+                <div className="space-y-1 font-mono text-[10px] text-black/60">
+                  <p>• Min bet: 0.1 OCT · Max: 10,000 OCT</p>
+                  <p>• Winner takes 95% of pot</p>
+                  <p>• 5% platform fee → Treasury</p>
+                  <p>• Unmatched bets auto-cancel after 24h</p>
+                  <p>• OneDEX swap for token conversion</p>
+                </div>
+              </div>
+              <div className="border-2 border-black bg-brutal-bg p-3">
+                <p className="font-mono text-xs font-bold text-black mb-2">🏆 GAMEFI</p>
+                <div className="space-y-1 font-mono text-[10px] text-black/60">
+                  <p>• XP system: LV.1 Rookie → LV.10 Legend</p>
+                  <p>• ELO rating: AI-calculated skill score</p>
+                  <p>• Win streak bonuses (+5 rep per 5 wins)</p>
+                  <p>• Dynamic badges from on-chain stats</p>
+                  <p>• OnePlay leaderboard ranked by ELO</p>
+                </div>
+              </div>
+            </div>
+
+            {/* AI */}
+            <div className="border-2 border-black bg-brutal-purple p-3">
+              <p className="font-mono text-xs font-bold text-white mb-2">🧠 AI ENGINE</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "NLP SENTIMENT", value: "55%", desc: "Weighted keyword analysis of news" },
+                  { label: "CROWD WISDOM", value: "35%", desc: "YES/NO vote ratio from players" },
+                  { label: "BASE SIGNAL", value: "10%", desc: "Market context + recency" },
+                ].map((f) => (
+                  <div key={f.label} className="border border-white/20 p-2 text-center">
+                    <p className="font-mono font-bold text-lg text-brutal-yellow">{f.value}</p>
+                    <p className="font-mono text-[10px] text-white/80 font-bold">{f.label}</p>
+                    <p className="font-mono text-[10px] text-white/40">{f.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ── Documentation / Tech Stack ── */}
         <div className="border-3 border-black bg-white shadow-brutal-xl animate-fade-in-up" style={{ animationDelay: '0.45s' }}>
           <div className="border-b-3 border-black p-4 bg-black">
