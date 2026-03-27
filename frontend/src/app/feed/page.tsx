@@ -136,7 +136,7 @@ export default function FeedPage() {
         }
       );
     },
-    [account, remaining, stakeAmount, addSwiped, signAndExecute, showMatch, addToast]
+    [account, remaining, stakeAmount, addSwiped, signAndExecute, showMatch, addToast, addBet]
   );
 
   // Keyboard shortcuts

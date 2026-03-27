@@ -71,6 +71,11 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
     if (!isDragging) setShowDetail(true);
   }
 
+  function handleClick() {
+    // Fallback click handler for environments where onTap doesn't fire
+    if (!isDragging) setShowDetail(true);
+  }
+
   // Background cards (stack effect) — neat pile behind top card
   if (!isTop) {
     const scale     = 1 - index * 0.05;
@@ -108,6 +113,7 @@ export function EventCard({ event, onSwipe, isTop, index, colorIndex }: Props) {
         onDragStart={() => setIsDragging(true)}
         onDragEnd={handleDragEnd}
         onTap={handleTap}
+        onClick={handleClick}
         whileTap={{ scale: 0.98 }}
         whileHover={{ scale: 1.02 }}
       >

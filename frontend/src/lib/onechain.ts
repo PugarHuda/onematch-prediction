@@ -162,7 +162,7 @@ export async function getOnChainEvents() {
   return events.data;
 }
 
-/** Fetch all PredictionEvent objects — direct fetch by known IDs + registry scan */
+/** Fetch all PredictionEvent objects — registry scan primary, known IDs as fallback */
 export async function fetchAllEvents(): Promise<Array<{
   id: string;
   question: string;
@@ -173,22 +173,22 @@ export async function fetchAllEvents(): Promise<Array<{
   yesCount: number;
   noCount: number;
 }>> {
-  try {
-    // Known on-chain event IDs (deployed on testnet)
-    const KNOWN_EVENT_IDS = [
-      "0xa601d9cf67b276ce9a4602adf10acdcef637e991f29ab8502af8005bf2a9be99",
-      "0xec6bd58afa70bb1a9a66d5b5d2fef9c7da7ad4ccb7fa96a69c2dd63acda7d7f7",
-      "0xf943ca570297d7d91120394c0001d2f415b56dd70ceee1c25db3373f924f5fbb",
-      "0x3bbb2b4de289bd462c1a4393ec581c61d2763ef161d22ae19952b30d39615671",
-      "0x2bb75d7ebac435d8f5e1900772ee5aeabde88bf9adface53cacf1a9c62bf50ad",
-    ];
+  // Known on-chain event IDs (deployed on testnet) — always included
+  const KNOWN_EVENT_IDS = [
+    "0xa601d9cf67b276ce9a4602adf10acdcef637e991f29ab8502af8005bf2a9be99",
+    "0xec6bd58afa70bb1a9a66d5b5d2fef9c7da7ad4ccb7fa96a69c2dd63acda7d7f7",
+    "0xf943ca570297d7d91120394c0001d2f415b56dd70ceee1c25db3373f924f5fbb",
+    "0x3bbb2b4de289bd462c1a4393ec581c61d2763ef161d22ae19952b30d39615671",
+    "0x2bb75d7ebac435d8f5e1900772ee5aeabde88bf9adface53cacf1a9c62bf50ad",
+  ];
 
-    // Also try to find new events via registry transactions
-    let extraIds: string[] = [];
+  try {
+    // PRIMARY: Scan registry transactions for ALL events (including new ones)
+    const discoveredIds = new Set<string>(KNOWN_EVENT_IDS);
     try {
       const txs = await suiClient.queryTransactionBlocks({
         filter: { InputObject: EVENT_REGISTRY_ID },
-        limit: 20,
+        limit: 50,
         order: "descending",
         options: { showObjectChanges: true },
       });
@@ -198,21 +198,18 @@ export async function fetchAllEvents(): Promise<Array<{
             "objectType" in change &&
             typeof change.objectType === "string" &&
             change.objectType.includes("::prediction_event::PredictionEvent") &&
-            "objectId" in change &&
-            !KNOWN_EVENT_IDS.includes(change.objectId)
+            "objectId" in change
           ) {
-            extraIds.push(change.objectId);
+            discoveredIds.add(change.objectId);
           }
         }
       }
     } catch {
-      // Registry scan failed, use known IDs only
+      // Registry scan failed — use known IDs only
     }
 
-    const allIds = [...new Set([...KNOWN_EVENT_IDS, ...extraIds])];
-
     const objects = await suiClient.multiGetObjects({
-      ids: allIds,
+      ids: Array.from(discoveredIds),
       options: { showContent: true },
     });
 
@@ -237,7 +234,7 @@ export async function fetchAllEvents(): Promise<Array<{
           noCount: Number(f.no_count ?? 0),
         };
       })
-      .filter((e) => e.status === 0 && e.endTime > Date.now()); // Only open + not expired
+      .filter((e) => e.status === 0 && e.endTime > Date.now());
   } catch {
     return [];
   }
