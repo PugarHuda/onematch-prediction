@@ -11,6 +11,7 @@ import type { PredictionEvent } from "@/lib/types";
 import { CATEGORY_EMOJI } from "@/lib/constants";
 import { useAppStore } from "@/lib/store";
 import { useMarketNews } from "@/lib/useMarketNews";
+import { useAISentiment } from "@/lib/useAISentiment";
 import { useState } from "react";
 import { Clock, Users, TrendingUp, X, ChevronLeft, ChevronRight, ChevronsUp, ChevronDown, Newspaper, BarChart2, Zap, Brain } from "lucide-react";
 
@@ -289,7 +290,12 @@ interface ModalProps {
 function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClose, onBet }: ModalProps) {
   const totalVotes = event.yesCount + event.noCount;
   const { news, loading } = useMarketNews(event.newsKeywords, event.category);
-  const [activeTab, setActiveTab] = useState<"info" | "news">("info");
+  const { data: ai, loading: aiLoading } = useAISentiment(
+    event.question, event.context,
+    news.map(n => n.title),
+    event.yesCount, event.noCount
+  );
+  const [activeTab, setActiveTab] = useState<"info" | "ai" | "news">("info");
 
   return (
     <motion.div
@@ -345,8 +351,8 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
         </div>
 
         {/* ── Tabs ── */}
-        <div className="border-b-3 border-black grid grid-cols-2 divide-x-3 divide-black flex-shrink-0">
-          {(["info", "news"] as const).map((tab, i) => (
+        <div className="border-b-3 border-black grid grid-cols-3 divide-x-3 divide-black flex-shrink-0">
+          {(["info", "ai", "news"] as const).map((tab, i) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -358,11 +364,8 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
               style={{ animationDelay: `${i * 0.05}s` }}
             >
               <span className="relative z-10 flex items-center gap-1 justify-center">
-                {tab === "info" ? <><BarChart2 size={12} /> MARKET INFO</> : <><Newspaper size={12} /> RELATED NEWS</>}
+                {tab === "info" ? <><BarChart2 size={12} /> INFO</> : tab === "ai" ? <><Brain size={12} /> AI</> : <><Newspaper size={12} /> NEWS</>}
               </span>
-              {activeTab !== tab && (
-                <span className="absolute inset-0 bg-brutal-yellow transform -translate-x-full group-hover/tab:translate-x-0 transition-transform duration-300" />
-              )}
               {activeTab === tab && (
                 <div className="absolute bottom-0 left-0 right-0 h-1 bg-brutal-yellow animate-shimmer" />
               )}
@@ -444,6 +447,55 @@ function EventDetailModal({ event, colors, stakeAmount, yesPct, timeLeft, onClos
                 <span className="inline-block animate-pulse-scale">⚡</span>
                 P2P duel on OneChain Testnet — funds locked in Move smart contract escrow.
               </p>
+            </div>
+          ) : activeTab === "ai" ? (
+            <div className="p-4 space-y-4">
+              {aiLoading ? (
+                <div className="border-2 border-black bg-white p-4 animate-pulse text-center">
+                  <Brain size={24} className="mx-auto mb-2 text-brutal-purple animate-spin-slow" />
+                  <p className="font-mono text-xs text-black/40">AI analyzing market data…</p>
+                </div>
+              ) : ai ? (
+                <>
+                  <div className={`border-3 border-black p-4 text-center shadow-brutal ${
+                    ai.recommendation === "YES" ? "bg-brutal-green" : ai.recommendation === "NO" ? "bg-brutal-red" : "bg-brutal-yellow"
+                  }`}>
+                    <p className="font-mono text-xs text-black/60 uppercase mb-1">AI RECOMMENDATION</p>
+                    <p className="font-mono font-bold text-4xl text-black">{ai.recommendation}</p>
+                    <p className="font-mono text-xs text-black/60 mt-1">{ai.confidence}% confidence</p>
+                  </div>
+                  <div className="border-2 border-black bg-white p-3 shadow-brutal">
+                    <p className="font-mono text-xs text-black/40 uppercase mb-2 flex items-center gap-1"><Brain size={10} /> SENTIMENT</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`brutal-tag ${ai.sentiment==="bullish"?"bg-brutal-green text-black":ai.sentiment==="bearish"?"bg-brutal-red text-white":"bg-brutal-yellow text-black"}`}>
+                        {ai.sentiment.toUpperCase()}
+                      </span>
+                      <div className="flex-1 h-2 bg-black/10 overflow-hidden border border-black">
+                        <div className="h-full bg-brutal-purple" style={{width:`${ai.confidence}%`}} />
+                      </div>
+                      <span className="font-mono text-xs font-bold">{ai.confidence}%</span>
+                    </div>
+                    <p className="font-mono text-[10px] text-black/50">{ai.reasoning}</p>
+                  </div>
+                  <div className="border-2 border-black bg-brutal-purple p-3 shadow-brutal">
+                    <p className="font-mono text-xs text-white/60 uppercase mb-1">AI + CROWD BLENDED</p>
+                    <div className="flex items-center gap-3">
+                      <p className="font-mono font-bold text-3xl text-brutal-yellow">{ai.blendedConfidence}%</p>
+                      <div className="flex-1">
+                        <div className="h-3 bg-white/20 overflow-hidden border border-white/30">
+                          <div className="h-full bg-brutal-yellow" style={{width:`${ai.blendedConfidence}%`}} />
+                        </div>
+                        <div className="flex justify-between font-mono text-[10px] text-white/40 mt-0.5"><span>NO</span><span>YES</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="font-mono text-[10px] text-black/30 text-center">NLP sentiment analysis of {news.length} articles + crowd wisdom</p>
+                </>
+              ) : (
+                <div className="border-2 border-black bg-white p-4 text-center">
+                  <p className="font-mono text-xs text-black/40">No AI data available</p>
+                </div>
+              )}
             </div>
           ) : (
             <div className="p-4 space-y-3">

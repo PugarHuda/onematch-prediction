@@ -118,7 +118,7 @@ export function TokenSwapWidget() {
       </button>
 
       <p className="font-mono text-[10px] text-black/30 text-center mt-2">
-        Powered by OneDEX · OneChain Testnet
+        Powered by OneDEX · Testnet Demo (router integration ready)
       </p>
     </div>
   );
