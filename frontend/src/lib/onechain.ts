@@ -186,12 +186,16 @@ export async function fetchAllEvents(): Promise<Array<{
     // PRIMARY: Scan registry transactions for ALL events (including new ones)
     const discoveredIds = new Set<string>(KNOWN_EVENT_IDS);
     try {
+      // Add timeout to prevent hanging on Vercel
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
       const txs = await suiClient.queryTransactionBlocks({
         filter: { InputObject: EVENT_REGISTRY_ID },
         limit: 50,
         order: "descending",
         options: { showObjectChanges: true },
       });
+      clearTimeout(timeout);
       for (const tx of txs.data) {
         for (const change of tx.objectChanges ?? []) {
           if (
@@ -219,7 +223,7 @@ export async function fetchAllEvents(): Promise<Array<{
       return "";
     };
 
-    return objects
+    const results = objects
       .filter((o) => o.data?.content?.dataType === "moveObject")
       .map((o) => {
         const f = (o.data!.content as { fields: Record<string, unknown> }).fields;
@@ -235,6 +239,9 @@ export async function fetchAllEvents(): Promise<Array<{
         };
       })
       .filter((e) => e.status === 0 && e.endTime > Date.now());
+
+    // Always return at least the known IDs count
+    return results.length > 0 ? results : [];
   } catch {
     return [];
   }

@@ -81,8 +81,7 @@ export default function FeedPage() {
   }, []);
 
   // Use chain events if available, fallback to MOCK_EVENTS
-  const allEvents = chainEvents.length > 0 ? chainEvents : MOCK_EVENTS;
-  const remaining = allEvents.filter((e) => !swipedIds.has(e.id));
+  const allEvents = chainEvents.length > 0 ? chainEvents : MOCK_EVENTS;  const remaining = allEvents.filter((e) => !swipedIds.has(e.id));
 
   const handleSwipe = useCallback(
     (direction: SwipeDir) => {
