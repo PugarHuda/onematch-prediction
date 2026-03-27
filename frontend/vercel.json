@@ -1,0 +1,15 @@
+{
+  "name": "onematch",
+  "env": {
+    "NEXT_PUBLIC_NETWORK": "testnet",
+    "NEXT_PUBLIC_RPC_URL": "https://rpc-testnet.onelabs.cc:443",
+    "NEXT_PUBLIC_FAUCET_URL": "https://faucet-testnet.onelabs.cc/v1/gas",
+    "NEXT_PUBLIC_EXPLORER_URL": "https://onescan.cc/testnet",
+    "NEXT_PUBLIC_PACKAGE_ID": "0xcf72b6d537ebef117b1b743fd06779a9a1e97ffcbbc24e288561799aed1bca39",
+    "NEXT_PUBLIC_EVENT_REGISTRY": "0x15f9cc02fc887eb9d6c1b09b903eeca02d7a9cc26e91a43447395d22664ac763",
+    "NEXT_PUBLIC_PROFILE_REGISTRY": "0x4727b0f5b2361716589b0d4f207fc5c50ac40e2b4e33d382406ceb91aaf237b3",
+    "NEXT_PUBLIC_ADMIN_CAP": "0xd2d5c52d3aa25e886a78a0cd7b9c3e2397665ea35335946420d71d87bc70980a",
+    "NEXT_PUBLIC_TREASURY_CONFIG": "0x79fec5a7bfb4fdba61ae26d13e0b587cd59c7d90fc3959e7dd00049c6e752c40",
+    "NEXT_PUBLIC_MATCHMAKER": "0xd498ca45353fc376a9c18a33cb491988cce310a2429947d3d54da479f1be7be7"
+  }
+}
