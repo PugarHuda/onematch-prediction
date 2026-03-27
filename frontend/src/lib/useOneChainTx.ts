@@ -2,10 +2,9 @@
 
 /**
  * useOneChainTx — Sign via OneWallet, execute via our RPC.
- * No demo fallback — real transactions only.
  */
 
-import { useSignTransaction, useSuiClient } from "@onelabs/dapp-kit";
+import { useSignTransaction, useSuiClient, useCurrentWallet } from "@onelabs/dapp-kit";
 import { useCallback, useState } from "react";
 import type { Transaction } from "@onelabs/sui/transactions";
 
@@ -17,11 +16,18 @@ type Callbacks = {
 
 export function useOneChainTx() {
   const client = useSuiClient();
+  const { currentWallet, connectionStatus } = useCurrentWallet();
   const { mutateAsync: signTx } = useSignTransaction();
   const [isPending, setIsPending] = useState(false);
 
   const mutate = useCallback(
     (args: { transaction: Transaction }, cb?: Callbacks) => {
+      // Guard: wallet must be connected
+      if (connectionStatus !== "connected" || !currentWallet) {
+        cb?.onError?.(new Error("Wallet not connected. Please connect OneWallet first."));
+        return;
+      }
+
       setIsPending(true);
 
       signTx({ transaction: args.transaction })
@@ -29,17 +35,18 @@ export function useOneChainTx() {
           const r = await client.executeTransactionBlock({
             transactionBlock: bytes,
             signature,
-            options: { showEffects: true },
+            options: { showEffects: true, showObjectChanges: true },
           });
           setIsPending(false);
           cb?.onSuccess?.({ ...r });
         })
         .catch((err: Error) => {
           setIsPending(false);
+          console.error("[useOneChainTx] Error:", err.message);
           cb?.onError?.(err);
         });
     },
-    [signTx, client]
+    [signTx, client, currentWallet, connectionStatus]
   );
 
   return { mutate, isPending };
