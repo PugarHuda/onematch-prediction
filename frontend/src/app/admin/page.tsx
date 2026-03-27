@@ -123,11 +123,19 @@ export default function AdminPage() {
       <main className="flex-1 max-w-3xl mx-auto px-4 py-8 w-full space-y-6">
         {/* Header */}
         <div className="border-3 border-black bg-brutal-pink shadow-brutal p-4">
-          <h1 className="font-mono font-bold text-2xl text-black flex items-center gap-2">
-            🔧 ADMIN PANEL
-          </h1>
+          <div className="flex items-center justify-between">
+            <h1 className="font-mono font-bold text-2xl text-black flex items-center gap-2">
+              🔧 ADMIN PANEL
+            </h1>
+            <span className="brutal-tag bg-brutal-purple text-white text-[10px]">HACKATHON DEMO</span>
+          </div>
           <p className="font-mono text-xs text-black/60 mt-1">
             AdminCap: {ADMIN_CAP_ID.slice(0, 16)}…
+          </p>
+          <p className="font-mono text-[10px] text-black/40 mt-1 border-t border-black/20 pt-1">
+            ⚠️ In production, this panel is only accessible to the wallet holding the AdminCap object.
+            For hackathon demo purposes, it is visible to all connected wallets.
+            Admin operations (settle/cancel) require the actual AdminCap to execute on-chain.
           </p>
         </div>
 

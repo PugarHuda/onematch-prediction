@@ -60,7 +60,9 @@ export function Header() {
 
   const visibleNav = [
     ...NAV_USER,
-    ...(isAdmin ? [{ href: "/admin", label: "ADMIN", Icon: Settings }] : []),
+    // Admin visible to all connected wallets for hackathon demo
+    // In production: only shown to AdminCap holders
+    ...(account ? [{ href: "/admin", label: "ADMIN", Icon: Settings }] : []),
   ];
 
   return (
