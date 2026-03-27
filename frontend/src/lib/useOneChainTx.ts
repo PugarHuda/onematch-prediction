@@ -1,15 +1,15 @@
 "use client";
 
 /**
- * useOneChainTx — Sign via wallet, execute via our RPC.
- * Falls back to demo mode if wallet fails entirely.
+ * useOneChainTx — Sign via OneWallet, execute via our RPC.
+ * No demo fallback — real transactions only.
  */
 
 import { useSignTransaction, useSuiClient } from "@onelabs/dapp-kit";
 import { useCallback, useState } from "react";
 import type { Transaction } from "@onelabs/sui/transactions";
 
-type TxResult = { digest: string; _demo?: boolean };
+type TxResult = { digest: string; [key: string]: unknown };
 type Callbacks = {
   onSuccess?: (data: TxResult) => void;
   onError?: (error: Error) => void;
@@ -32,13 +32,11 @@ export function useOneChainTx() {
             options: { showEffects: true },
           });
           setIsPending(false);
-          cb?.onSuccess?.({ digest: r.digest });
+          cb?.onSuccess?.({ ...r });
         })
-        .catch(() => {
-          // Demo mode fallback for presentation
+        .catch((err: Error) => {
           setIsPending(false);
-          const id = `demo_${Date.now().toString(36)}`;
-          cb?.onSuccess?.({ digest: id, _demo: true });
+          cb?.onError?.(err);
         });
     },
     [signTx, client]

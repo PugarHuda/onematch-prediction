@@ -1,142 +1,167 @@
-# OneMatch — P2P Social Prediction Market
+# OneMatch — P2P Prediction Duels on OneChain
 
-> Swipe. Match. Predict. Win. Built on OneChain for OneHack 3.0.
+> Swipe. Match. Predict. Win. Built for OneHack 3.0 AI-GameFi Edition.
 
 ## What is OneMatch?
 
-OneMatch is a P2P prediction market with a Tinder-like swipe UX. Every prediction is a **direct duel** between two users — not against a liquidity pool. Smart contracts on OneChain hold funds in escrow until the event settles.
+OneMatch is a P2P prediction market with a Tinder-like swipe UX. Every prediction is a direct duel between two users — not against a liquidity pool. Move smart contracts on OneChain hold funds in escrow until the event settles. AI-powered sentiment analysis helps users make informed decisions.
+
+## Live Demo
+
+- **Website**: https://frontend-pi-one-48.vercel.app
+- **GitHub**: https://github.com/PugarHuda/onematch-prediction
+- **Explorer**: https://onescan.cc/testnet
+- **Package ID**: `0xcf72b6d537ebef117b1b743fd06779a9a1e97ffcbbc24e288561799aed1bca39`
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Smart Contracts | Move on OneChain (fork of Sui) |
-| Frontend | Next.js 15 + React 19 + Framer Motion |
+| Smart Contracts | Move on OneChain (3 modules, 14 unit tests) |
+| Frontend | Next.js 15 + React 18 + Framer Motion + Tailwind |
 | Wallet | @onelabs/dapp-kit (OneWallet) |
-| SDK | @onelabs/sui |
-| Currency | OCT (native token) |
+| AI Engine | NLP sentiment analysis + ELO rating system |
+| Currency | OCT (native token, min bet 0.1 OCT) |
 | Network | OneChain Testnet |
 
-## OneChain Products Used
+## OneChain Products Integrated
 
-### ✅ Actively Implemented
+| Product | Usage | Status |
+|---------|-------|--------|
+| **OneWallet** | Connect, sign transactions | ✅ Live |
+| **Move Contracts** | P2P escrow, events, profiles | ✅ Deployed |
+| **OCT Token** | Betting currency, balance display | ✅ Live |
+| **OneID** | On-chain profiles, reputation, badges | ✅ Live |
+| **OneTransfer** | Auto-payout 95% to winner | ✅ In contracts |
+| **OneDEX** | Token swap widget | ✅ UI + tx building |
+| **OnePlay** | AI-ranked leaderboard | ✅ Live |
+| **OnePredict** | P2P prediction mechanics | ✅ Live |
 
-1. **OneWallet** 🔐
-   - Full wallet integration via `@onelabs/dapp-kit`
-   - Transaction signing for all bet placements
-   - Real-time balance display in header
-   - Connect/disconnect functionality
-   - **Files**: `Header.tsx`, `Providers.tsx`, all page components
+## AI Features
 
-2. **Move Smart Contracts** 📜
-   - `prediction_event.move` - Event lifecycle management
-   - `prediction_escrow.move` - P2P escrow with auto-matching
-   - `user_profile.move` - On-chain reputation system
-   - **Network**: OneChain Testnet
-   - **Currency**: OCT native token
+- **NLP Sentiment Analysis**: Weighted keyword analysis of news headlines (bullish/bearish scoring)
+- **Multi-Factor Blending**: 55% AI sentiment + 35% crowd wisdom + 10% base
+- **AI Matchmaking**: ELO-based rating (base 1000 + wins×25 + streak×15 + winRate×3)
+- **Recommendation Engine**: YES/NO/HOLD with confidence % per event
+- **Key Signal Extraction**: Shows which keywords triggered the analysis
 
-3. **OCT Token** 💰
-   - Native currency for all predictions
-   - Mist ↔ OCT conversion utilities
-   - Real-time balance tracking via OneChain RPC
-   - **Files**: `onechain.ts`, `constants.ts`
+## GameFi Mechanics
 
-4. **OneID Concept** 👤
-   - On-chain user profiles with reputation
-   - Win rate, total volume, streak tracking
-   - Badge system (Rookie, Pro, Legend, etc.)
-   - Persistent identity across sessions
-   - **Files**: `user_profile.move`, `profile/page.tsx`
+- **XP & Level System**: LV.1 Rookie → LV.10 Legend (reputation-based)
+- **ELO Rating**: AI-calculated skill score visible on profile + leaderboard
+- **Streak Bonuses**: +5 reputation every 5-win streak
+- **Dynamic Badges**: Hot Streak, Sharp Caller, Diamond Hands, Newcomer
+- **P2P Duels**: Direct 1v1 prediction battles with escrow
 
-5. **OneTransfer** 💸
-   - Automatic winner payouts via smart contract
-   - 95% to winner, 5% platform fee
-   - Instant settlement on event resolution
-   - Escrow fund management in `MatchedDuel` objects
-   - **Files**: `prediction_escrow.move`
+## Smart Contracts (14 tests, all passing)
 
-6. **OnePredict Mechanics** 🎲
-   - P2P prediction market implementation
-   - Binary outcome events (YES/NO positions)
-   - Real-time sentiment tracking
-   - Category-based organization (Crypto, Sports, Politics, etc.)
-   - **Files**: `prediction_event.move`, `EventCard.tsx`
+### prediction_event.move
+- Event creation with category + end time
+- Admin settlement with Clock validation
+- Event cancellation (emergency)
+- Vote count tracking (yes/no)
 
-### 🔮 Future Integration Opportunities
+### prediction_escrow.move
+- P2P escrow with TreasuryConfig (fees to deployer, not burned)
+- PendingBet with 24h expiry
+- Match validation (equal stakes, same event, not expired)
+- 95% winner payout, 5% platform fee
+- Bet cancellation with refund
 
-- **OneDEX**: Multi-token betting (swap tokens before placing bets)
-- **OnePlay**: Leaderboards, tournaments, seasonal competitions
-- **OneRWA**: Real-world asset prediction markets
-- **OnePoker**: Tournament-style bracket predictions
+### user_profile.move
+- On-chain profiles with username validation (3-20 chars)
+- Win/loss/streak tracking
+- Reputation system (+10 win, +2 participation, +5 streak bonus)
+- ProfileRegistry prevents duplicates
 
 ## Project Structure
 
 ```
 onematch/
 ├── contracts/
-│   ├── Move.toml
-│   └── sources/
-│       ├── prediction_event.move   # Event creation & settlement
-│       ├── prediction_escrow.move  # P2P escrow & matching
-│       └── user_profile.move       # On-chain reputation (OneID)
+│   ├── sources/
+│   │   ├── prediction_event.move    # Event lifecycle
+│   │   ├── prediction_escrow.move   # P2P escrow + treasury
+│   │   ├── user_profile.move        # On-chain reputation
+│   │   └── tests.move               # 14 unit tests
+│   └── Move.toml
 └── frontend/
     └── src/
         ├── app/
-        │   ├── page.tsx            # Landing page
-        │   ├── feed/page.tsx       # Swipe feed
-        │   ├── duels/page.tsx      # Active duels
-        │   └── profile/page.tsx    # User profile
+        │   ├── page.tsx             # Landing page
+        │   ├── feed/page.tsx        # Swipe feed
+        │   ├── duels/page.tsx       # Active duels (synced)
+        │   ├── profile/page.tsx     # On-chain profile + GameFi
+        │   ├── admin/page.tsx       # Admin panel (AdminCap only)
+        │   ├── docs/page.tsx        # Documentation
+        │   └── api/
+        │       ├── ai/route.ts      # AI sentiment API
+        │       └── news/route.ts    # GNews proxy
         ├── components/
-        │   ├── EventCard.tsx       # Swipeable card
-        │   ├── MatchModal.tsx      # "It's a Match!" animation
-        │   ├── StakeSlider.tsx     # Stake amount selector
-        │   ├── Header.tsx          # Nav + wallet connect
-        │   └── Providers.tsx       # SDK providers
+        │   ├── EventCard.tsx        # Swipeable card + AI tab
+        │   ├── MatchModal.tsx       # Match animation + AI indicator
+        │   ├── StakeSlider.tsx      # Stake selector (0.1-10000 OCT)
+        │   ├── TokenSwapWidget.tsx  # OneDEX swap
+        │   ├── Leaderboard.tsx      # AI-ranked (on-chain fetch)
+        │   ├── Header.tsx           # Nav + AdminCap check
+        │   └── Toast.tsx            # Notifications
         └── lib/
-            ├── onechain.ts         # Transaction builders
-            ├── constants.ts        # Config & contract IDs
-            ├── types.ts            # TypeScript types
-            └── store.ts            # Zustand state
+            ├── onechain.ts          # Transaction builders + queries
+            ├── useOneChainTx.ts     # Sign + execute hook
+            ├── useAISentiment.ts    # AI analysis hook
+            ├── constants.ts         # Contract addresses
+            ├── store.ts             # Zustand (bets, profile, toasts)
+            └── types.ts             # TypeScript types + events
 ```
 
 ## Getting Started
 
 ### 1. Deploy Contracts
-
 ```bash
 cd contracts
 one move build
-one move test
-one client publish --gas-budget 50000000
+one move test        # 14/14 should pass
+one client publish --gas-budget 100000000
 ```
 
-Copy the PackageID, EventRegistry ID, and ProfileRegistry ID into `frontend/src/lib/constants.ts`.
-
 ### 2. Run Frontend
-
 ```bash
 cd frontend
 pnpm install
 pnpm dev
 ```
 
-Visit `http://localhost:3000`
-
 ### 3. Get Testnet OCT
-
 ```bash
 curl -X POST https://faucet-testnet.onelabs.cc/v1/gas \
   -H "Content-Type: application/json" \
-  -d '{"FixedAmountRequest": {"recipient": "<YOUR_ADDRESS>"}}'
+  -d '{"FixedAmountRequest":{"recipient":"YOUR_ADDRESS"}}'
 ```
+
+## On-Chain Data (Testnet)
+
+- 5 PredictionEvent objects (crypto, tech, politics)
+- 5 UserProfile objects (OneMatch_Admin, crypto_whale, degen_bob, move_maxi, ai_trader)
+- EventRegistry, ProfileRegistry, TreasuryConfig, AdminCap
 
 ## How It Works
 
-1. **Swipe** — User sees event cards one at a time. Swipe right = YES, left = NO, up = YES × 3 stake.
-2. **Match** — AI matchmaking finds an opponent with the opposite position. Funds locked in `MatchedDuel` shared object.
-3. **Settle** — After event deadline, admin/oracle calls `settle()`. Smart contract pays winner 95% of pot.
-4. **Reputation** — Win/loss recorded on-chain in `UserProfile` (OneID-compatible).
+1. **Swipe** → Browse events. Right=YES, Left=NO, Up=3×stake, Down=Skip
+2. **AI Analysis** → NLP sentiment + crowd wisdom = recommendation
+3. **Match** → AI matchmaker finds opponent. Funds locked in escrow
+4. **Settle** → Admin settles after deadline. Smart contract pays winner 95%
+5. **Reputation** → Win/loss recorded on-chain. Level up, earn badges
 
-## Explorer
+## Architecture
 
-All transactions visible at: https://onescan.cc/testnet
+```
+Frontend (Next.js) → OneWallet (Sign) → OneChain RPC (Execute)
+     ↓                                        ↓
+AI Engine (NLP)                         3 Move Contracts
+     ↓                                        ↓
+GNews API                              On-chain Objects
+```
+
+---
+
+Built with ❤️ on OneChain for OneHack 3.0 AI-GameFi Edition
